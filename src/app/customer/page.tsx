@@ -196,7 +196,7 @@ function SearchDestinations() {
             <h2 className="text-2xl font-bold mb-6">Popular Destinations</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               {packages.map((pkg) => (
-                <Link key={pkg.id} href={`/user/destination/${pkg.id}`}>
+                <Link key={pkg.id} href={`/customer/destination/${pkg.id}`}>
                   <Card key={pkg.id} className="overflow-hidden hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300 hover:-translate-y-2 group cursor-pointer border-slate-100 rounded-2xl bg-white flex flex-col h-full">
                     <div className="h-56 bg-slate-200 relative overflow-hidden">
                       <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors z-10"></div>
@@ -262,7 +262,7 @@ function SearchDestinations() {
           <h2 className="text-xl font-semibold mt-10 mb-4">Search Results</h2>
           <div className="grid md:grid-cols-4 gap-4">
             {results.map((pkg) => (
-              <Link key={pkg.id} href={`/user/destination/${pkg.id}`}>
+              <Link key={pkg.id} href={`/customer/destination/${pkg.id}`}>
                 <Card key={pkg.id} className="overflow-hidden hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300 hover:-translate-y-2 group cursor-pointer border-slate-100 rounded-2xl bg-white flex flex-col h-full">
                   <div className="h-56 bg-slate-200 relative overflow-hidden">
                     <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors z-10"></div>
