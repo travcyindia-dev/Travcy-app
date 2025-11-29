@@ -147,7 +147,7 @@ function DestinationPage({ params }: { params: Promise<{ id: string }> }) {
     <div className="">
       {/* Header */}
       <section className="">
-        <Link href="/customer/search" className="text-primary text-sm font-semibold hover:opacity-80">
+        <Link href="/customer" className="text-primary text-sm font-semibold hover:opacity-80">
           ← Back to Search
         </Link>
         {/* <h1 className="text-4xl font-bold flex items-center gap-2">
