@@ -97,11 +97,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ agencies, onVeri
                   <div className="p-8 text-center text-slate-500">All caught up! No pending verifications.</div>
                 ) : (
                   pendingAgencies.map(agency => (
-                    <div key={agency.id} className="p-6 flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between hover:bg-slate-50 transition-colors">
+                    <div key={agency.uid} className="p-6 flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between hover:bg-slate-50 transition-colors">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-bold text-lg text-slate-900">{agency.name}</h4>
-                          <Badge variant="default">{agency.Tier}</Badge>
+                          {/* <Badge variant="default">{agency.Tier}</Badge> */}
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-sm text-slate-600 mt-2">
                            <div className="flex items-center gap-2"><MapPin className="w-3 h-3"/> {agency.location}</div>
@@ -123,8 +123,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ agencies, onVeri
 
                       <div className="flex gap-2 w-full xl:w-auto">
                          <Button variant="outline" className="text-xs h-9 flex-1 xl:flex-none">View Docs</Button>
-                         <Button variant="danger" className="text-xs h-9 flex-1 xl:flex-none" onClick={() => onVerify(agency.id, 'rejected')}>Reject</Button>
-                         <Button variant="success" className="text-xs h-9 flex-1 xl:flex-none" onClick={() => onVerify(agency.id, 'approved')}>Approve</Button>
+                         <Button variant="danger" className="text-xs h-9 flex-1 xl:flex-none" onClick={() => onVerify(agency.uid, 'rejected')}>Reject</Button>
+                         <Button variant="success" className="text-xs h-9 flex-1 xl:flex-none" onClick={() => onVerify(agency.uid, 'approved')}>Approve</Button>
                       </div>
                     </div>
                   ))

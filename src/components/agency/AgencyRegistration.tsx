@@ -46,9 +46,9 @@ export const AgencyRegistrationForm: React.FC<RegistrationProps> = ({ onCancel, 
         website: formData.website,
         verified: false, 
         paid: false, 
-        Tier: 'Pending', 
-        rating: 0, 
-        priceStart: 0 
+        // Tier: 'Pending', 
+        // rating: 0, 
+        // priceStart: 0 
       });
       setLoading(false);
     }, 1500);

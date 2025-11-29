@@ -8,7 +8,7 @@ export interface Agency {
   location: string;
   // rating: number;
   verified: boolean;
-  // paid: boolean;
+  paid?: boolean;
   // priceStart: number;
   // Tier: AgencyTier;
   trustScore?: number;

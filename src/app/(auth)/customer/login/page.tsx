@@ -4,14 +4,11 @@ import Link from "next/link"
 import { Chrome } from "lucide-react"
 import React from "react"
 import { usePathname, useRouter } from "next/navigation"
-import signIn from "@/app/api/auth/signin/route"
-import signUp from "@/app/api/auth/signup/customer/route"
 import { getAuth } from "firebase/auth"
 import { toastError, toastSuccess } from "@/components/ui/ToastTypes"
 import { checkUserRole } from "../../checkUserRole"
-
-
-
+import signUp from "@/lib/auth/signup/customer/Signup"
+import signIn from "@/lib/auth/signin/SignIn"
 
 
 console.log("Loaded API KEY:", process.env.NEXT_PUBLIC_FIREBASE_API_KEY);
@@ -41,25 +38,25 @@ export default function UserLogin() {
       const token = await result.user.getIdToken();
       const role = checkUserRole();
       console.log("role:", role);
-       if (result) {
-      // getIdToken is a function that returns Promise<string>, so await it
+      if (result) {
+        // getIdToken is a function that returns Promise<string>, so await it
 
-      const token = await result.user.getIdToken();
-      const checkRole = await checkUserRole();
-      const role=checkRole?.role
-      console.log("role:", role);
-      console.log("pathname:", pathname);
-      if (token && role && role===pathname.startsWith(`/customer`)) {
-        localStorage.setItem('token', token);
-        console.log("token:", token);
-        toastSuccess("Login Successful")
-        return router.push(`/customer`)
-      }
-      if(role!==pathname.includes('/customer')){
-        toastError("Please login as a customer")
-      }
+        const token = await result.user.getIdToken();
+        const checkRole = await checkUserRole();
+        const role = checkRole?.role
+        console.log("role:", role);
+        console.log("pathname:", pathname);
+        if (token && role && role === pathname.startsWith(`/customer`)) {
+          localStorage.setItem('token', token);
+          console.log("token:", token);
+          toastSuccess("Login Successful")
+          return router.push(`/customer`)
+        }
+        if (role !== pathname.includes('/customer')) {
+          toastError("Please login as a customer")
+        }
 
-    }
+      }
 
     }
 
@@ -83,14 +80,18 @@ export default function UserLogin() {
 
       const token = await result.user.getIdToken();
       const checkRole = await checkUserRole();
-      const role=checkRole?.role
+      const role = checkRole?.role
       console.log("role:", role);
       console.log("pathname:", pathname);
-      if (token && role && pathname.startsWith(`/${role}`)) {
+      if (token && role && role === "customer") {
         localStorage.setItem('token', token);
         console.log("token:", token);
         toastSuccess("Login Successful")
-        return router.push("/customer")
+        return router.push(`/customer`)
+      }
+      if (role !== "customer") {
+        toastError("Please login as a customer")
+        localStorage.clear()
       }
 
     }
