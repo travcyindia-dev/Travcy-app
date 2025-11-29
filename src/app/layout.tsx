@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthContextProvider } from "@/context/AuthContext";
+import { Toaster } from "sonner";
  
 
 export const metadata: Metadata = {
@@ -14,8 +16,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+      </head>
       <body>
-        {children}
+        <AuthContextProvider>
+           {children}
+           <Toaster/>
+        </AuthContextProvider>
+       
       </body>
     </html>
   );

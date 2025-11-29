@@ -3,14 +3,14 @@ export type ViewState = 'login' | 'register-agency' | 'dashboard';
 export type AgencyTier = 'Basic' | 'Pro' | 'Enterprise' | 'Pending';
 
 export interface Agency {
-  id: number;
+  uid: number;
   name: string;
   location: string;
-  rating: number;
+  // rating: number;
   verified: boolean;
-  paid: boolean;
-  priceStart: number;
-  Tier: AgencyTier;
+  // paid: boolean;
+  // priceStart: number;
+  // Tier: AgencyTier;
   trustScore?: number;
   docUrl?: string;
   website?: string;
