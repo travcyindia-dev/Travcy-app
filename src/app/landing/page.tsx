@@ -51,7 +51,7 @@ export default function Landing() {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 pt-8">
                 <Link
-                  href="/customer/login"
+                  href="/user/login"
                   className="px-8 py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition text-center"
                 >
                   Login as Customer
