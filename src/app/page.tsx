@@ -57,7 +57,7 @@ export default function Landing() {
                   Login as Customer
                 </Link>
                 <Link
-                  href="/agent/login"
+                  href="/agency/login"
                   className="px-8 py-4 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary hover:text-primary-foreground transition text-center"
                 >
                   Login as Travel Agent
