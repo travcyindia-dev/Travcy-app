@@ -79,7 +79,7 @@ export const AgencyPortal: React.FC<AgencyPortalProps> = ({ agency, bookings, on
                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-500"/> Basic Analytics</li>
                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-500"/> Email Support</li>
              </ul>
-             <Button className="w-full" variant="outline" onClick={() => onPayment(agency.id, 'Basic')}>Select Starter</Button>
+             <Button className="w-full" variant="outline" onClick={() => onPayment(agency.uid, 'Basic')}>Select Starter</Button>
            </Card>
            
            {/* Pro Plan */}
@@ -93,7 +93,7 @@ export const AgencyPortal: React.FC<AgencyPortalProps> = ({ agency, bookings, on
                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-blue-600"/> Advanced Analytics</li>
                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-blue-600"/> 24/7 Support</li>
              </ul>
-             <Button className="w-full" onClick={() => onPayment(agency.id, 'Pro')}>Select Professional</Button>
+             <Button className="w-full" onClick={() => onPayment(agency.uid, 'Pro')}>Select Professional</Button>
            </Card>
         </div>
         <div className="mt-8">
@@ -226,14 +226,14 @@ export const AgencyPortal: React.FC<AgencyPortalProps> = ({ agency, bookings, on
                 <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600"><Star className="w-6 h-6"/></div>
                 <div>
                   <p className="text-xs text-slate-500 font-bold uppercase">Rating</p>
-                  <p className="text-2xl font-bold">{agency.rating}</p>
+                  <p className="text-2xl font-bold">No rating</p>
                 </div>
              </Card>
              <Card className="p-5 bg-slate-900 text-white relative overflow-hidden">
                  <div className="relative z-10">
                      <p className="text-slate-400 text-xs font-bold uppercase">Current Plan</p>
                      <div className="flex justify-between items-end">
-                       <p className="text-xl font-bold">{agency.Tier}</p>
+                       <p className="text-xl font-bold">Pro</p>
                        <p className="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded-full">Paid</p>
                      </div>
                  </div>

@@ -63,14 +63,14 @@ const PackageDetailsModal = ({ agency, onClose }: { agency: Agency; onClose: () 
               <span className="font-medium text-blue-600">{agency.name}</span>
               <span>•</span>
               <div className="flex items-center text-amber-500">
-                <Star className="w-3 h-3 fill-current" /> {agency.rating}
+                <Star className="w-3 h-3 fill-current" /> 4
               </div>
             </div>
             
             <div className="mt-6 space-y-4">
               <div className="flex justify-between items-center py-3 border-b border-slate-100">
                 <span className="text-slate-500 text-sm">Base Price</span>
-                <span className="text-xl font-bold text-slate-900">${agency.priceStart}</span>
+                <span className="text-xl font-bold text-slate-900">$300</span>
               </div>
               <div className="flex justify-between items-center py-3 border-b border-slate-100">
                 <span className="text-slate-500 text-sm">Travelers</span>
@@ -416,7 +416,7 @@ export const TravelerDashboard: React.FC<TravelerDashboardProps> = ({ agencies, 
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {activeAgencies.map(agency => (
-                    <Card key={agency.id} className="overflow-hidden hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300 hover:-translate-y-2 group cursor-pointer border-slate-100 rounded-2xl bg-white flex flex-col h-full">
+                    <Card key={agency.uid} className="overflow-hidden hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300 hover:-translate-y-2 group cursor-pointer border-slate-100 rounded-2xl bg-white flex flex-col h-full">
                       {/* Card Image Area */}
                       <div className="h-56 bg-slate-200 relative overflow-hidden" onClick={() => setSelectedPackage(agency)}>
                           <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/10 transition-colors z-10"></div>
@@ -431,10 +431,10 @@ export const TravelerDashboard: React.FC<TravelerDashboardProps> = ({ agencies, 
                             </Badge>
                           </div>
                           <button 
-                            onClick={(e) => toggleWishlist(e, agency.id)}
+                            onClick={(e) => toggleWishlist(e, agency.uid)}
                             className="absolute top-4 right-4 z-20 p-2 rounded-full bg-white/20 backdrop-blur-md hover:bg-white transition-colors group/heart"
                           >
-                             <Heart className={`w-5 h-5 transition-colors ${wishlist.includes(agency.id) ? 'fill-red-500 text-red-500' : 'text-white group-hover/heart:text-red-500'}`} />
+                             <Heart className={`w-5 h-5 transition-colors ${wishlist.includes(agency.uid) ? 'fill-red-500 text-red-500' : 'text-white group-hover/heart:text-red-500'}`} />
                           </button>
                       </div>
 
@@ -452,7 +452,7 @@ export const TravelerDashboard: React.FC<TravelerDashboardProps> = ({ agencies, 
                                <Clock className="w-3.5 h-3.5" /> 5 Days
                             </div>
                             <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded">
-                               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> {agency.rating}
+                               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> 2
                             </div>
                           </div>
 
@@ -460,7 +460,7 @@ export const TravelerDashboard: React.FC<TravelerDashboardProps> = ({ agencies, 
                             <div>
                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">From</p>
                                 <div className="flex items-baseline gap-1">
-                                  <span className="font-bold text-xl text-slate-900">${agency.priceStart}</span>
+                                  <span className="font-bold text-xl text-slate-900">$300</span>
                                   <span className="text-xs text-slate-400">/person</span>
                                 </div>
                             </div>

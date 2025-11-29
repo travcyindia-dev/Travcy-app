@@ -2,8 +2,8 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { admin } from "@/lib/firebaseAdmin";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase-admin/firestore";
-const auth = getAuth();
-const db = getFirestore();
+// const auth = getAuth();
+const db = admin.firestore();
 export async function POST(req: Request) {
     try {
         const { id, status } = await req.json();

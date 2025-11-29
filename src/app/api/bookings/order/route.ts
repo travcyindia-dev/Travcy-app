@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import Razorpay from "razorpay"
-import { createBooking } from "../create-booking/route";
 
 export async function POST(req: Request) {
     const { amount} = await req.json()

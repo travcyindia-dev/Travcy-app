@@ -4,12 +4,11 @@ import Link from "next/link"
 import { Chrome } from "lucide-react"
 import React from "react"
 import { usePathname, useRouter } from "next/navigation"
-import signIn from "@/app/api/auth/signin/route"
-import signUp from "@/app/api/auth/signup/agency/route"
 import { getAuth } from "firebase/auth"
 import axios from "axios"
 import { checkUserRole } from "../../checkUserRole"
 import { toastError, toastSuccess } from "@/components/ui/ToastTypes"
+import signIn from "@/lib/auth/signin/SignIn"
 
 
 const auth = getAuth();
