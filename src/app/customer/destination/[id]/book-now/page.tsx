@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 
 import { use, useEffect, useState } from "react"
 import { Mail, Phone, MapPin, Users, Calendar, Home, Plane, FileText } from "lucide-react"
@@ -11,7 +11,7 @@ import axios from "axios";
 import Router from "next/router";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 // import { saveBooking } from "@/lib/booking-store"
 // import type { Booking } from "@/lib/types"
 
@@ -19,9 +19,73 @@ import { useRouter } from "next/navigation";
 //   onSuccess: (bookingId: string) => void
 // }
 
-export default function BookingForm({ params }: { params: Promise<{ id: string }> }) {
+type FormFieldProps = {
+  label: string;
+  name: keyof BookingFormData;
+  type?: string;
+  placeholder?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  required?: boolean;
+  children?: React.ReactNode;
+  value: string;
+  error?: string;
+  onChange: (e: React.ChangeEvent<any>) => void;
+};
+
+    type BookingFormData = {
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    numberOfTravelers: string;
+    startDate: string;
+    endDate: string;
+    accommodation: string;
+    transportation: string;
+    specialRequests: string;
+};
+
+export const FormField = React.memo(function FormField({
+  label,
+  name,
+  type = "text",
+  placeholder,
+  icon: Icon,
+  required = true,
+  children,
+  value,
+  error,
+  onChange,
+}: FormFieldProps) {
+  return (
+    <div>
+      <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+        {Icon && <Icon className="w-4 h-4 text-primary" />}
+        {label}
+        {required && <span className="text-destructive">*</span>}
+      </label>
+
+      {children ? (
+        children
+      ) : (
+        <input
+          type={type}
+          name={name}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          className={`w-full px-4 py-2 border rounded-lg ${
+            error ? "border-destructive bg-destructive/5" : "border-border"
+          }`}
+        />
+      )}
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
+    </div>
+  );
+});
+export default function BookingForm({ params }: { params:{ id: string }}) {
     // const { id } = use(params);
-    const { id } = use(params);
+    const  {id}  = useParams();
     console.log("id:", id);
     const { user } = useAuthContext();
     const { packages } = usePackageStore()
@@ -53,6 +117,10 @@ export default function BookingForm({ params }: { params: Promise<{ id: string }
 
     // const details = getPackageDetails();
     async function getPackageById() {
+        if (!id || typeof id !== "string") {
+            console.log("Invalid package id");
+            return undefined;
+        }
         const docRef = doc(db, "packages", id);
         const docSnap = await getDoc(docRef);
 
@@ -156,60 +224,9 @@ export default function BookingForm({ params }: { params: Promise<{ id: string }
     }
 
 
-    type BookingFormData = {
-    fullName: string;
-    email: string;
-    phoneNumber: string;
-    numberOfTravelers: string;
-    startDate: string;
-    endDate: string;
-    accommodation: string;
-    transportation: string;
-    specialRequests: string;
-};
 
 
-    const FormField = <T extends BookingFormData>({
-    label,
-    name,
-    type = "text",
-    placeholder,
-    icon: Icon,
-    children,
-    required = true,
-}: {
-    label: string;
-    name: keyof BookingFormData;
-    type?: string;
-    placeholder?: string;
-    icon?: React.ComponentType<{ className?: string }>;
-    children?: React.ReactNode;
-    required?: boolean;
-}) => (
-    <div>
-        <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-            {Icon && <Icon className="w-4 h-4 text-primary" />}
-            {label}
-            {required && <span className="text-destructive">*</span>}
-        </label>
-
-        {children || (
-            <input
-                type={type}
-                name={name}
-                placeholder={placeholder}
-                value={formData[name]}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg ${
-                    errors[name] ? "border-destructive bg-destructive/5" : "border-border"
-                }`}
-            />
-        )}
-
-        {errors[name] && <p className="text-sm text-destructive">{errors[name]}</p>}
-    </div>
-);
-
+    
     // console.log("price:", pkg);
     const handleBooking = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -328,7 +345,7 @@ export default function BookingForm({ params }: { params: Promise<{ id: string }
         }
     }
 
-
+console.log("formdata:",formData);
     return (
         <form onSubmit={handleBooking} className="bg-card rounded-lg border border-border p-8">
             <div className="space-y-8">
@@ -336,9 +353,9 @@ export default function BookingForm({ params }: { params: Promise<{ id: string }
                 <div>
                     <h2 className="text-xl font-semibold text-foreground mb-6">Personal Information</h2>
                     <div className="grid md:grid-cols-2 gap-6">
-                        <FormField label="Full Name" name="fullName" placeholder="John Doe" />
-                        <FormField label="Email" name="email" type="email" placeholder="john@example.com" icon={Mail} />
-                        <FormField label="Phone Number" name="phoneNumber" placeholder="+1 (555) 123-4567" icon={Phone} />
+                        <FormField label="Full Name" name="fullName" placeholder="John Doe" error={errors.fullName} onChange={handleChange} value={formData.fullName}/>
+                        <FormField label="Email" name="email" type="email" placeholder="john@example.com" icon={Mail} error={errors.email} onChange={handleChange} value={formData.email}/>
+                        <FormField label="Phone Number" name="phoneNumber" placeholder="+1 (555) 123-4567" icon={Phone} error={errors.phoneNumber} onChange={handleChange} value={formData.phoneNumber}/>
                     </div>
                 </div>
 
@@ -353,6 +370,9 @@ export default function BookingForm({ params }: { params: Promise<{ id: string }
                             type="number"
                             placeholder="1"
                             icon={Users}
+                            error={errors.numberOfTravelers}
+                            onChange={handleChange}
+                            value={formData.numberOfTravelers}
                         />
                     </div>
                 </div>
@@ -361,8 +381,15 @@ export default function BookingForm({ params }: { params: Promise<{ id: string }
                 <div>
                     <h2 className="text-xl font-semibold text-foreground mb-6">Travel Dates</h2>
                     <div className="grid md:grid-cols-2 gap-6">
-                        <FormField label="Start Date" name="startDate" type="date" icon={Calendar} />
-                        <FormField label="End Date" name="endDate" type="date" icon={Calendar} />
+                        <FormField label="Start Date" name="startDate" type="date" icon={Calendar}  
+                        error={errors.startDate}
+                            onChange={handleChange}
+                            value={formData.startDate} />
+                        <FormField 
+                        label="End Date" name="endDate" type="date" icon={Calendar} 
+                         error={errors.endDate}
+                            onChange={handleChange}
+                            value={formData.endDate}/>
                     </div>
                 </div>
 
@@ -370,7 +397,9 @@ export default function BookingForm({ params }: { params: Promise<{ id: string }
                 <div>
                     <h2 className="text-xl font-semibold text-foreground mb-6">Travel Preferences</h2>
                     <div className="grid md:grid-cols-2 gap-6">
-                        <FormField label="Accommodation Preference" name="accommodation" icon={Home}>
+                        <FormField label="Accommodation Preference" name="accommodation" icon={Home}  error={errors.accommodation}
+                            onChange={handleChange}
+                            value={formData.accommodation}>
                             <select
                                 name="accommodation"
                                 value={formData.accommodation}
@@ -389,7 +418,9 @@ export default function BookingForm({ params }: { params: Promise<{ id: string }
                             </select>
                             {errors.accommodation && <p className="mt-1 text-sm text-destructive">{errors.accommodation}</p>}
                         </FormField>
-                        <FormField label="Transportation Preference" name="transportation" icon={Plane}>
+                        <FormField label="Transportation Preference" name="transportation" icon={Plane}  error={errors.transportation}
+                            onChange={handleChange}
+                            value={formData.transportation}>
                             <select
                                 name="transportation"
                                 value={formData.transportation}
@@ -420,6 +451,9 @@ export default function BookingForm({ params }: { params: Promise<{ id: string }
                         placeholder="Any special requirements or preferences? (Optional)"
                         icon={FileText}
                         required={false}
+                         error={errors.specialRequests}
+                            onChange={handleChange}
+                            value={formData.specialRequests}
                     >
                         <textarea
                             name="specialRequests"

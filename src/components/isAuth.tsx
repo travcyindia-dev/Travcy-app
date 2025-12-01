@@ -13,7 +13,7 @@ export default function isAuth(Component: any) {
     console.log("user:",user);
     useEffect(() => {
       if (!auth) {
-        return redirect("/landing");
+        return redirect("/");
       }
     }, []);
 

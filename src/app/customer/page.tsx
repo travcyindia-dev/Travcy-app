@@ -10,6 +10,7 @@ import { db } from "@/lib/firebase"
 import { Badge, Button, Card } from "@/components/ui/Shared"
 import { usePackageStore } from "@/store/packageStore"
 import Image from "next/image"
+import { useBookingStore } from "@/store/bookingStore"
 
 const destinations = [
   { id: 1, name: "Zanzibar", country: "Tanzania", image: "/zanzibar-beach.jpg", packages: 24 },
@@ -79,7 +80,8 @@ function SearchDestinations() {
       setResults([]);
     }
   }, [destination]);
-
+  // console.log("packages:",packages);
+  // console.log("bookings:",useBookingStore.getState().bookings);
   async function fetchAll() {
     try {
       const packagesSnap = await getDocs(collection(db, "packages"));
