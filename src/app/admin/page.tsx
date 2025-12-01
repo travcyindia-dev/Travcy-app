@@ -5,6 +5,8 @@ import { ShieldCheck, LogOut, DollarSign, Briefcase, Bell, LayoutDashboard, User
 import { Card, Button, Badge } from '@/components/ui/Shared';
 import { Agency } from '../../types';
 import axios from 'axios';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface AdminDashboardProps {
   agencies: Agency[];
@@ -13,14 +15,14 @@ interface AdminDashboardProps {
 }
 
 const MOCK_AGENCIES: Agency[] = [
-  {uid: 1, name: 'Global Treks', location: 'Goa', verified: true,  taxId: 'TAX-111' },
-  {uid: 2, name: 'Himalayan Highs', location: 'Himachal', verified: true , taxId: 'TAX-222' },
-  {uid: 3, name: 'Desert Safari Co', location: 'Rajasthan', verified: false, taxId: 'TAX-333' },
+  { uid: 1, name: 'Global Treks', location: 'Goa', verified: true, taxId: 'TAX-111' },
+  { uid: 2, name: 'Himalayan Highs', location: 'Himachal', verified: true, taxId: 'TAX-222' },
+  { uid: 3, name: 'Desert Safari Co', location: 'Rajasthan', verified: false, taxId: 'TAX-333' },
 ];
 
 
 export default function AdminDashboard() {
-  const [agencies, setAgencies] = useState<Agency[]>([]);
+  const [agencies, setAgencies] = useState<any>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'financials'>('overview');
   const pendingAgencies = MOCK_AGENCIES.filter(a => !a.verified);
   const activeAgenciesCount = MOCK_AGENCIES.filter(a => a.verified).length;
@@ -32,10 +34,26 @@ export default function AdminDashboard() {
     console.log("agencies :", data);
   }
 
-  useEffect(() => {
-    fetchUnverifiedAgencies();
-    console.log("agencies:", agencies);
-  }, [])
+ useEffect(() => {
+  const q = query(
+    collection(db, "agencies"),
+    where("approved", "==", false)
+  );
+
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    const result = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    console.log("Realtime pending agencies:", result);
+    setAgencies(result); 
+  });
+
+  return () => unsubscribe();
+}, []);
+
+
 
   const onLogout = () => {
     console.log("logout")
@@ -43,15 +61,15 @@ export default function AdminDashboard() {
   const onVerify = async (id: number, status: 'approved' | 'rejected') => {
     const response = await axios.post('/api/agencies/approve-agency',
       {
-        id: id,
+        uid: id,
         status: status
       }
     );
     // Update UI instantly
-    setAgencies((prev) =>
-      prev.map((agency) =>
+    setAgencies((prev:any) =>
+      prev.map((agency:any) =>
         agency.uid === id
-          ? { ...agency, verified: status === "approved", status }
+          ? { ...agency, approved:true, status }
           : agency
       )
     );
@@ -139,37 +157,37 @@ export default function AdminDashboard() {
                 {agencies.length === 0 ? (
                   <div className="p-8 text-center text-slate-500">All caught up! No pending verifications.</div>
                 ) : (
-                  agencies.map(agency => (
-                    <div key={agency.uid} className="p-6 flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between hover:bg-slate-50 transition-colors">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-bold text-lg text-slate-900">{agency.name}</h4>
-                          {/* <Badge variant="default">{agency.Tier}</Badge> */}
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-sm text-slate-600 mt-2">
-                          <div className="flex items-center gap-2"><MapPin className="w-3 h-3" /> {agency.location}</div>
-                          <div className="flex items-center gap-2"><FileText className="w-3 h-3" /> {agency.taxId}</div>
-                          <div className="flex items-center gap-2 col-span-2 mt-1">
-                            <a href="#" className="text-blue-600 underline hover:text-blue-800 transition-colors">{agency.website || 'No website provided'}</a>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Trust Score Logic */}
-                      <div className="flex flex-col items-center px-4 border-l border-r border-slate-200 mx-4 min-w-[140px]">
-                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Trust Score</span>
-                        <div className={`text-3xl font-bold my-1 ${agency.trustScore && agency.trustScore > 70 ? 'text-emerald-600' : 'text-red-500'}`}>
-                          {agency.trustScore || 0}%
-                        </div>
-                        <span className="text-[10px] text-slate-400 text-center leading-tight">Automated risk assessment</span>
-                      </div>
-
-                      <div className="flex gap-2 w-full xl:w-auto">
-                        <Button variant="outline" className="text-xs h-9 flex-1 xl:flex-none">View Docs</Button>
-                        <Button variant="danger" className="text-xs h-9 flex-1 xl:flex-none" onClick={() => onVerify(agency.uid, 'rejected')}>Reject</Button>
-                        <Button variant="success" className="text-xs h-9 flex-1 xl:flex-none" onClick={() => onVerify(agency.uid, 'approved')}>Approve</Button>
+                  agencies.map((agency: Agency & { trustScore?: number; website?: string }) => (
+                  <div key={agency.uid} className="p-6 flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between hover:bg-slate-50 transition-colors">
+                    <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-bold text-lg text-slate-900">{agency.name}</h4>
+                      {/* <Badge variant="default">{agency.Tier}</Badge> */}
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-sm text-slate-600 mt-2">
+                      <div className="flex items-center gap-2"><MapPin className="w-3 h-3" /> {agency.location}</div>
+                      <div className="flex items-center gap-2"><FileText className="w-3 h-3" /> {agency.taxId}</div>
+                      <div className="flex items-center gap-2 col-span-2 mt-1">
+                      <a href="#" className="text-blue-600 underline hover:text-blue-800 transition-colors">{agency.website || 'No website provided'}</a>
                       </div>
                     </div>
+                    </div>
+
+                    {/* Trust Score Logic */}
+                    <div className="flex flex-col items-center px-4 border-l border-r border-slate-200 mx-4 min-w-[140px]">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Trust Score</span>
+                    <div className={`text-3xl font-bold my-1 ${agency.trustScore && agency.trustScore > 70 ? 'text-emerald-600' : 'text-red-500'}`}>
+                      {agency.trustScore || 0}%
+                    </div>
+                    <span className="text-[10px] text-slate-400 text-center leading-tight">Automated risk assessment</span>
+                    </div>
+
+                    <div className="flex gap-2 w-full xl:w-auto">
+                    <Button variant="outline" className="text-xs h-9 flex-1 xl:flex-none">View Docs</Button>
+                    <Button variant="danger" className="text-xs h-9 flex-1 xl:flex-none" onClick={() => onVerify(agency.uid, 'rejected')}>Reject</Button>
+                    <Button variant="success" className="text-xs h-9 flex-1 xl:flex-none" onClick={() => onVerify(agency.uid, 'approved')}>Approve</Button>
+                    </div>
+                  </div>
                   ))
                 )}
               </div>

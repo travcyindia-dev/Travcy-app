@@ -1,5 +1,6 @@
 // src/store/usePackageStore.ts
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export interface Package {
   id: string;
@@ -23,7 +24,8 @@ interface PackageState {
   reset:()=>void;
 }
 
-export const usePackageStore = create<PackageState>((set) => ({
+export const usePackageStore = create<PackageState>()(persist(
+  (set) => ({
   packages: [],
   setPackages: (packages) => set({ packages }),
   addPackage: (pkg) => set((state) => ({ packages: [...state.packages, pkg] })),
@@ -34,4 +36,8 @@ export const usePackageStore = create<PackageState>((set) => ({
   removePackage: (id) =>
     set((state) => ({ packages: state.packages.filter((p) => p.id !== id) })),
   reset:()=>set({packages:[]})
-}));
+}),
+{
+  name:"package-store"
+}
+));

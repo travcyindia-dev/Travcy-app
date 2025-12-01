@@ -8,6 +8,7 @@ import { toastError, toastSuccess } from "@/components/ui/ToastTypes";
 import { error } from "console";
 import { useBookingStore } from "@/store/bookingStore";
 import { usePackageStore } from "@/store/packageStore";
+import Loading from "@/app/loading/page";
 
 const auth = getAuth(app);
 
@@ -63,7 +64,7 @@ export const AuthContextProvider = ({
 
     return (
         <AuthContext.Provider value={{ user, logout }}>
-            {loading ? <div>Loading...</div> : children}
+            {loading ? <div><Loading/></div> : children}
         </AuthContext.Provider>
     );
 };

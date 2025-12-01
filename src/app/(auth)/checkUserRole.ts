@@ -1,6 +1,6 @@
+import { auth } from "@/lib/firebase";
 import { getAuth } from "firebase/auth";
 
-const auth = getAuth();
 export async function checkUserRole() {
   const user = auth.currentUser;
   if (!user) return;

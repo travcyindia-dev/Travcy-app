@@ -264,17 +264,17 @@ export const AgencyPortal: React.FC<AgencyPortalProps> = ({ agency, bookings, on
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {bookings.length > 0 ? bookings.map(booking => (
-                        <tr key={booking.id} className="hover:bg-slate-50 transition-colors">
+                        <tr key={booking.bookingId} className="hover:bg-slate-50 transition-colors">
                           <td className="px-6 py-4 font-medium text-slate-900">
                             <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-600">
-                                {booking.user.charAt(0)}
+                              <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-lg text-slate-600">
+                                {booking.email.charAt(0)}
                               </div>
-                              {booking.user}
+                              <span>{booking.userId}</span>
                             </div>
                           </td>
                           <td className="px-6 py-4">{booking.destination}</td>
-                          <td className="px-6 py-4 text-slate-500">{booking.date}</td>
+                          <td className="px-6 py-4 text-slate-500">{booking.startDate}</td>
                           <td className="px-6 py-4">
                             <Badge variant={booking.status === 'Confirmed' ? 'success' : 'warning'}>{booking.status}</Badge>
                           </td>

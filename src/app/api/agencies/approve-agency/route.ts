@@ -6,19 +6,19 @@ import { getFirestore } from "firebase-admin/firestore";
 const db = admin.firestore();
 export async function POST(req: Request) {
     try {
-        const { id, status } = await req.json();
+        const { uid, status } = await req.json();
 
         if (status == 'approved') {
             // 1️⃣ Update Firestore
-            await db.collection("agencies").doc(id).update({ approved: true});
+            await db.collection("agencies").doc(uid).update({ approved: true});
 
             // 2️⃣ Set role in custom claims
-            await admin.auth().setCustomUserClaims(id, { role: "agency" });
+            await admin.auth().setCustomUserClaims(uid, { role: "agency" });
             return new Response(JSON.stringify({ success: true, message: "account approved" }), { status: 200 });
         }
         else {
-            await db.collection("agencies").doc(id).delete();
-            await admin.auth().deleteUser(id);
+            await db.collection("agencies").doc(uid).delete();
+            await admin.auth().deleteUser(uid);
             return new Response(JSON.stringify({ success: true, message: "account rejected" }), { status: 200 });
         }
 

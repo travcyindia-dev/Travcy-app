@@ -4,11 +4,12 @@ import Link from "next/link"
 import { Chrome } from "lucide-react"
 import React from "react"
 import { usePathname, useRouter } from "next/navigation"
-import { getAuth } from "firebase/auth"
+import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged } from "firebase/auth"
 import axios from "axios"
 import { checkUserRole } from "../../checkUserRole"
 import { toastError, toastSuccess } from "@/components/ui/ToastTypes"
 import signIn from "@/lib/auth/signin/SignIn"
+import { toast } from "sonner"
 
 
 const auth = getAuth();
@@ -36,22 +37,57 @@ export default function UserLogin() {
   const [agencyName, setAgencyName] = React.useState('')
   const [location, setLocation] = React.useState('');
   const [isSignup, setIsSignup] = React.useState(false);
-  const pathname=usePathname();
+  const pathname = usePathname();
   const router = useRouter();
 
   const handleSignUp = async (event: any) => {
     event.preventDefault()
+    let AlertMessage = '';
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-    const response = await axios.post("/api/agencies/add-agencies", {
+      const response = await axios.post("/api/agencies/add-agencies", {
 
-      email: email,
-      name: agencyName,
-      password: password,
-      location: location
-    })
-    console.log("response:", response.data);
+        email: email,
+        name: agencyName,
+        password: password,
+        location: location,
+        uid: userCredential.user.uid
+      })
+      console.log("response:", response.data);
+       await userCredential.user.reload();
 
-    return router.push("/agency/verify-notif");
+      onAuthStateChanged(auth, (user) => {
+   if (user) router.push("/agency/verify-notif")
+})
+    }
+    catch (e: any) {
+
+      switch (e.code) {
+        case "auth/user-not-found":
+          AlertMessage = "No account found. Please sign up first.";
+          break;
+
+        case "auth/wrong-password":
+          AlertMessage = "Incorrect password.";
+          break;
+
+        case "auth/email-already-in-use":
+          AlertMessage = "This email is already sent for verification";
+          break;
+
+        case "auth/invalid-credential":
+          AlertMessage = "Invalid credentials. Please try again.";
+          break;
+
+        default:
+          AlertMessage = "Something went wrong. Please try again.";
+
+      }
+      if(e){toastError(AlertMessage);}
+
+    }
+  
   }
 
 
@@ -60,14 +96,14 @@ export default function UserLogin() {
   const handleSignIn = async (event: any) => {
     event.preventDefault()
 
-    const { result, error,alert } = await signIn(email, password);
+    const { result, error, alert } = await signIn(email, password);
 
     if (error) {
-      console.log("alert:",alert)
+      console.log("alert:", alert)
       toastError(`${alert}`);
       return console.log(error)
     }
-     
+
     // else successful
     console.log(result);
 
@@ -79,7 +115,7 @@ export default function UserLogin() {
       const role = checkRole?.role
       console.log("role:", role);
       console.log("pathname:", pathname);
-     
+
       if (token && role && pathname.startsWith(`/${role}`)) {
         localStorage.setItem('token', token);
         console.log("token:", token);
@@ -87,7 +123,7 @@ export default function UserLogin() {
         return router.push("/agency")
       }
 
-      else{
+      else {
         toastError("Only agencies can login!!")
       }
 

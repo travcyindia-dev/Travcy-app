@@ -68,7 +68,7 @@ function Bookings() {
                   <div className="flex items-center gap-4 text-muted-foreground text-sm mt-2">
                     <div className="flex items-center gap-1">
                       <MapPin className="w-4 h-4" />
-                      {pkg?.destination}
+                      {booking?.destination}
                     </div>
 
                     <div className="flex items-center gap-1">
@@ -78,7 +78,7 @@ function Bookings() {
 
                     <div className="flex items-center gap-1">
                       <Users className="w-4 h-4" />
-                      {pkg?.maxTravellers} guests
+                      {booking.numberOfTravelers} guests
                     </div>
                   </div>
                 </div>
@@ -86,7 +86,7 @@ function Bookings() {
                 <div className="text-right">
                   <p className="text-2xl font-bold text-primary">₹{booking?.amount}</p>
                   <p className={`text-sm font-semibold mt-1 ${booking.status === "CONFIRMED" ? "text-green-600" : "text-muted-foreground"}`}>
-                    {booking.status === "CONFIRMED" ? "✓ Confirmed" : "Completed"}
+                    {booking.status === "confirmed" ? "✓ Confirmed" : "Completed"}
                   </p>
                 </div>
 

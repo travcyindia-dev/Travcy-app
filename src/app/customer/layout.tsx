@@ -7,6 +7,7 @@ import { Home, Search, BookOpen, LogOut, MapPin } from "lucide-react"
 import type React from "react"
 import { Suspense } from "react"
 import { useAuthContext } from "@/context/AuthContext"
+import Loading from "../loading/page"
 
 export default function UserLayout({
   children,
@@ -21,7 +22,7 @@ export default function UserLayout({
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<Loading/>}>
         <nav className="sticky top-0 z-50 bg-white border-b border-border shadow-sm">
           <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <Link href="/customer" className="flex items-center gap-2 font-bold text-xl text-primary">

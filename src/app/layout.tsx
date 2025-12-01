@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AuthContextProvider } from "@/context/AuthContext";
 import { Toaster } from "sonner";
- 
+import { Suspense } from "react";
+import Loading from "./loading/page";
+import { AgencyAuthProvider } from "@/context/AgencyAuthContext";
+
 
 export const metadata: Metadata = {
   title: "MVP Starter",
@@ -20,11 +23,14 @@ export default function RootLayout({
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
       </head>
       <body>
-        <AuthContextProvider>
-           {children}
-           <Toaster/>
-        </AuthContextProvider>
-       
+        <Suspense fallback={<Loading />}>
+          <AgencyAuthProvider>
+            <AuthContextProvider>
+              {children}
+              <Toaster position="top-center" />
+            </AuthContextProvider>
+          </AgencyAuthProvider>
+        </Suspense>
       </body>
     </html>
   );

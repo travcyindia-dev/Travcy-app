@@ -13,8 +13,8 @@ export async function POST(req: any) {
     let error = null;
 
     try {
-        const userCredential = await createUserWithEmailAndPassword(auth, body.email, body.password);
-        const uid = userCredential.user.uid;
+        
+        const uid = body.uid;
 
         result = await setDoc(doc(db, "agencies", uid), {
             uid,

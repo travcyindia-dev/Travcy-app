@@ -18,10 +18,65 @@ export interface Agency {
 }
 
 export interface Booking {
-  id: number;
-  user: string;
-  destination: string;
-  date: string;
-  status: 'Confirmed' | 'Pending' | 'Cancelled';
-  amount: number;
+accommodation:string
+
+
+agencyId:string
+
+
+amount:string
+
+
+bookingId:string
+
+
+cancelled:Boolean
+
+
+createdAt:string
+
+
+destination:string
+
+
+email:string
+
+
+endDate:string
+
+
+fullName:string
+
+
+numberOfTravelers:number
+
+
+orderId:string
+
+
+packageId:string
+
+
+paymentId:string
+
+
+phoneNumber:string
+
+
+specialRequests:string
+
+
+startDate:string
+
+
+status:string
+
+
+transportation:string
+
+
+userId:string
+
+
+
 }
