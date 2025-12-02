@@ -9,6 +9,7 @@ import { toastError, toastSuccess } from "@/components/ui/ToastTypes"
 import { checkUserRole } from "../../checkUserRole"
 import signUp from "@/lib/auth/signup/customer/Signup"
 import signIn from "@/lib/auth/signin/SignIn"
+import { handleGoogleLogin } from "@/lib/auth/signin/googleLogin"
 
 
 console.log("Loaded API KEY:", process.env.NEXT_PUBLIC_FIREBASE_API_KEY);
@@ -166,11 +167,11 @@ export default function UserLogin() {
           </div>
 
           {/* Google Login */}
-          <button className="w-full py-3 border border-border rounded-lg hover:bg-muted transition flex items-center justify-center gap-2 font-semibold">
+          <button className="w-full py-3 border border-border rounded-lg hover:bg-muted transition flex items-center justify-center gap-2 font-semibold" onClick={()=>{handleGoogleLogin(router)}}>
             <Chrome className="w-5 h-5" />
             Google
+        
           </button>
-
           {/* Sign Up Link */}
           <p className="text-center text-sm text-muted-foreground">
             {isSignup ? "Already have an account?" : "Don’t have an account?"}{" "}

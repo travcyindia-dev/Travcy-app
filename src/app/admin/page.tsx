@@ -14,18 +14,18 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-const MOCK_AGENCIES: Agency[] = [
-  { uid: 1, name: 'Global Treks', location: 'Goa', verified: true, taxId: 'TAX-111' },
-  { uid: 2, name: 'Himalayan Highs', location: 'Himachal', verified: true, taxId: 'TAX-222' },
-  { uid: 3, name: 'Desert Safari Co', location: 'Rajasthan', verified: false, taxId: 'TAX-333' },
-];
+// const MOCK_AGENCIES: Agency[] = [
+//   { uid: 1, name: 'Global Treks', location: 'Goa', verified: true, taxId: 'TAX-111' },
+//   { uid: 2, name: 'Himalayan Highs', location: 'Himachal', verified: true, taxId: 'TAX-222' },
+//   { uid: 3, name: 'Desert Safari Co', location: 'Rajasthan', verified: false, taxId: 'TAX-333' },
+// ];
 
 
 export default function AdminDashboard() {
   const [agencies, setAgencies] = useState<any>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'financials'>('overview');
-  const pendingAgencies = MOCK_AGENCIES.filter(a => !a.verified);
-  const activeAgenciesCount = MOCK_AGENCIES.filter(a => a.verified).length;
+  // const pendingAgencies = MOCK_AGENCIES.filter(a => !a.verified);
+  // const activeAgenciesCount = MOCK_AGENCIES.filter(a => a.verified).length;
 
   const fetchUnverifiedAgencies = async () => {
     const response = await axios.get('/api/agencies/fetch-agencies');
@@ -61,14 +61,14 @@ export default function AdminDashboard() {
   const onVerify = async (id: number, status: 'approved' | 'rejected') => {
     const response = await axios.post('/api/agencies/approve-agency',
       {
-        uid: id,
+        uid: String(id),
         status: status
       }
     );
     // Update UI instantly
     setAgencies((prev:any) =>
       prev.map((agency:any) =>
-        agency.uid === id
+        agency.uid === String(id)
           ? { ...agency, approved:true, status }
           : agency
       )
@@ -134,14 +134,14 @@ export default function AdminDashboard() {
               <Card className="p-6 border-l-4 border-l-emerald-500 flex justify-between items-center">
                 <div>
                   <p className="text-sm text-slate-500 font-medium">Active Agencies</p>
-                  <h3 className="text-3xl font-bold mt-1 text-slate-900">{activeAgenciesCount}</h3>
+                  <h3 className="text-3xl font-bold mt-1 text-slate-900">3</h3>
                 </div>
                 <div className="p-3 bg-emerald-50 rounded-full text-emerald-600"><Briefcase className="w-6 h-6" /></div>
               </Card>
               <Card className="p-6 border-l-4 border-l-amber-500 flex justify-between items-center">
                 <div>
                   <p className="text-sm text-slate-500 font-medium">Pending Approvals</p>
-                  <h3 className="text-3xl font-bold mt-1 text-slate-900">{pendingAgencies.length}</h3>
+                  <h3 className="text-3xl font-bold mt-1 text-slate-900">4</h3>
                 </div>
                 <div className="p-3 bg-amber-50 rounded-full text-amber-600"><Bell className="w-6 h-6" /></div>
               </Card>
@@ -151,7 +151,7 @@ export default function AdminDashboard() {
             <Card>
               <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                 <h3 className="font-bold text-slate-800">Agency Verification Queue</h3>
-                <Badge variant="warning">{pendingAgencies.length} Pending</Badge>
+                <Badge variant="warning">4 Pending</Badge>
               </div>
               <div className="divide-y divide-slate-100">
                 {agencies.length === 0 ? (

@@ -10,6 +10,7 @@ import { checkUserRole } from "../../checkUserRole"
 import { toastError, toastSuccess } from "@/components/ui/ToastTypes"
 import signIn from "@/lib/auth/signin/SignIn"
 import { toast } from "sonner"
+import { handleGoogleAgencyAuth } from "@/lib/auth/agency/googleLogin"
 
 
 const auth = getAuth();
@@ -231,9 +232,9 @@ export default function UserLogin() {
           </div>
 
           {/* Google Login */}
-          <button className="w-full py-3 border border-border rounded-lg hover:bg-muted transition flex items-center justify-center gap-2 font-semibold">
+          <button className="w-full py-3 border border-border rounded-lg hover:bg-muted transition flex items-center justify-center gap-2 font-semibold" onClick={()=>{handleGoogleAgencyAuth(router, isSignup ? "signup" : "login")}}>
             <Chrome className="w-5 h-5" />
-            Google
+            {!isSignup?"Login with Google":"Sign up with Google"}
           </button>
 
           {/* Sign Up Link */}
