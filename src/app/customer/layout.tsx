@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSearchParams } from "next/navigation"
-import { Home, Search, BookOpen, LogOut, MapPin } from "lucide-react"
+import { Home, Search, BookOpen, LogOut, MapPin, User } from "lucide-react"
 import type React from "react"
 import { Suspense } from "react"
 import { useAuthContext } from "@/context/AuthContext"
@@ -34,7 +34,7 @@ export default function UserLayout({
               <Link
                 href="/customer"
                 className={`px-4 py-2 rounded-lg flex items-center gap-2 transition ${
-                  isActive("/user") && pathname !== "/user/search"
+                  pathname === "/customer"
                     ? "bg-primary/10 text-primary font-semibold"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
@@ -42,27 +42,27 @@ export default function UserLayout({
                 <Home className="w-4 h-4" />
                 <span className="hidden sm:inline">Home</span>
               </Link>
-              {/* <Link
-                href="/user/search"
-                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition ${
-                  isActive("/user/search")
-                    ? "bg-primary/10 text-primary font-semibold"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Search className="w-4 h-4" />
-                <span className="hidden sm:inline">Search</span>
-              </Link> */}
               <Link
                 href="/customer/bookings"
                 className={`px-4 py-2 rounded-lg flex items-center gap-2 transition ${
-                  isActive("/user/bookings")
+                  isActive("/customer/bookings")
                     ? "bg-primary/10 text-primary font-semibold"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <BookOpen className="w-4 h-4" />
                 <span className="hidden sm:inline">Bookings</span>
+              </Link>
+              <Link
+                href="/customer/profile"
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition ${
+                  isActive("/customer/profile")
+                    ? "bg-primary/10 text-primary font-semibold"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <User className="w-4 h-4" />
+                <span className="hidden sm:inline">Profile</span>
               </Link>
               <button className="px-4 py-2 rounded-lg flex items-center gap-2 text-muted-foreground hover:text-destructive transition" onClick={logout}>
                 <LogOut className="w-4 h-4" />
