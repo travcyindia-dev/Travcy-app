@@ -5,7 +5,7 @@ const db = admin.firestore();
 
 export async function POST(req: Request) {
   try {
-    const { uid, role, email, displayName } = await req.json();
+    const { uid, role, email, displayName, phone, address, city, profilePic } = await req.json();
     if (!uid || !role) {
       return NextResponse.json({ success: false, error: "Missing uid or role" }, { status: 400 });
     }
@@ -19,6 +19,10 @@ export async function POST(req: Request) {
       role,
       email: email || null,
       displayName: displayName || null,
+      phone: phone || null,
+      address: address || null,
+      city: city || null,
+      profilePic: profilePic || null,
       createdAt: new Date().toISOString(),
     }, { merge: true });
 
