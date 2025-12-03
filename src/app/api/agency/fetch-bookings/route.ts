@@ -7,7 +7,7 @@ export async function GET(req: Request) {
     const agencyId = searchParams.get("agencyId");
 
     if (!agencyId) {
-      return NextResponse.json({ error: "Missing agencyId" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "Missing agencyId" }, { status: 400 });
     }
     
     const firestore = admin.firestore();
@@ -16,11 +16,19 @@ export async function GET(req: Request) {
       .where("agencyId", "==", agencyId)
       .get();
 
-    const bookings = snap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
+    const bookings = snap.docs.map((d: any) => {
+      const data = d.data();
+      return {
+        id: d.id,
+        ...data,
+        // Convert Firestore timestamps
+        createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt || null,
+      };
+    });
 
-    return NextResponse.json({ bookings });
+    return NextResponse.json({ success: true, bookings });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
   }
 }

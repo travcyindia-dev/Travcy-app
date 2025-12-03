@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSearchParams } from "next/navigation"
-import { Home, LogOut, MapPin, Building2 } from "lucide-react"
+import { Home, LogOut, MapPin, Building2, Package } from "lucide-react"
 import type React from "react"
 import { Suspense } from "react"
 import { useAuthContext } from "@/context/AuthContext"
@@ -41,6 +41,17 @@ export default function Layout({
               >
                 <Home className="w-4 h-4" />
                 <span className="hidden sm:inline">Dashboard</span>
+              </Link>
+              <Link
+                href="/agency/packages"
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition ${
+                  isActive("/agency/packages")
+                    ? "bg-primary/10 text-primary font-semibold"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Package className="w-4 h-4" />
+                <span className="hidden sm:inline">Packages</span>
               </Link>
               <Link
                 href="/agency/profile"
