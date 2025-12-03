@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import { createHmac } from "crypto";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { sendEmail, emailTemplates } from "@/lib/email";
 
 export async function POST(req: Request) {
     try {
         const { orderId,
             razorpayPaymentId,
             razorpayOrderId,
-            razorpaySignature, userId,packageId,agencyId,amount,booking,destination} = await req.json();
+            razorpaySignature, userId,packageId,agencyId,amount,booking,destination,packageTitle} = await req.json();
             const secretKey = process.env.NEXT_PUBLIC_RAZOR_PAY_TEST_KEY_SECRET;
         
         if (!secretKey) {
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
         // console.log()
         let bookingData=null
         if(digest===razorpaySignature){
-            const response=await createBooking({userId:userId,packageId:packageId,agencyId:agencyId,amount:amount,orderId:orderId,paymentId:razorpayPaymentId,booking:booking,destination:destination})
+            const response=await createBooking({userId:userId,packageId:packageId,agencyId:agencyId,amount:amount,orderId:orderId,paymentId:razorpayPaymentId,booking:booking,destination:destination,packageTitle:packageTitle})
             bookingData=response.bookingResponse
         }
         return NextResponse.json({
@@ -47,7 +48,7 @@ export async function POST(req: Request) {
 
 
 // A server-side helper function
-export async function createBooking({ userId, packageId, agencyId, amount, orderId, paymentId, booking,destination }: { userId: string; packageId: string; agencyId: string; amount: number; orderId: string; paymentId: string; booking: any,destination:string }) {
+export async function createBooking({ userId, packageId, agencyId, amount, orderId, paymentId, booking,destination,packageTitle }: { userId: string; packageId: string; agencyId: string; amount: number; orderId: string; paymentId: string; booking: any,destination:string,packageTitle?:string }) {
     try {
         const bookingId = booking.bookingId;
 
@@ -57,6 +58,7 @@ export async function createBooking({ userId, packageId, agencyId, amount, order
             email: booking.email,
             phoneNumber: booking.phoneNumber,
             destination:destination,
+            packageTitle: packageTitle || destination,
             numberOfTravelers: Number.parseInt(booking.numberOfTravelers),
             startDate: booking.startDate,
             endDate: booking.endDate,
@@ -77,6 +79,47 @@ export async function createBooking({ userId, packageId, agencyId, amount, order
         }, {
             merge: true,
         });
+
+        // Send confirmation email to customer (fire-and-forget, don't block response)
+        if (booking.email) {
+            const customerTemplate = emailTemplates.bookingConfirmation({
+                customerName: booking.fullName,
+                bookingId: bookingId,
+                packageTitle: packageTitle || destination,
+                destination: destination,
+                startDate: booking.startDate,
+                endDate: booking.endDate,
+                travelers: Number.parseInt(booking.numberOfTravelers),
+                amount: amount,
+                paymentId: paymentId,
+            });
+            sendEmail(booking.email, customerTemplate).catch(err => console.error("Booking confirmation email failed:", err));
+        }
+
+        // Send notification email to agency (fire-and-forget, don't block response)
+        getDoc(doc(db, "agencies", agencyId)).then(agencyDoc => {
+            if (agencyDoc.exists()) {
+                const agencyData = agencyDoc.data();
+                if (agencyData?.email) {
+                    const agencyTemplate = emailTemplates.agencyNewBooking({
+                        agencyName: agencyData.name || "Agency",
+                        customerName: booking.fullName,
+                        customerEmail: booking.email,
+                        customerPhone: booking.phoneNumber,
+                        bookingId: bookingId,
+                        packageTitle: packageTitle || destination,
+                        destination: destination,
+                        startDate: booking.startDate,
+                        endDate: booking.endDate,
+                        travelers: Number.parseInt(booking.numberOfTravelers),
+                        amount: amount,
+                    });
+                    sendEmail(agencyData.email, agencyTemplate).catch(err => 
+                        console.error("Agency notification email failed:", err)
+                    );
+                }
+            }
+        }).catch(err => console.error("Error fetching agency for email:", err));
 
         return {
             bookingResponse: {

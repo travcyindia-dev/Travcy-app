@@ -1,5 +1,6 @@
 import { admin } from "@/lib/firebaseAdmin";
 import { NextResponse } from "next/server";
+import { sendEmail, emailTemplates } from "@/lib/email";
 
 const db = admin.firestore();
 
@@ -25,6 +26,12 @@ export async function POST(req: Request) {
       profilePic: profilePic || null,
       createdAt: new Date().toISOString(),
     }, { merge: true });
+
+    // Send welcome email to customer (fire-and-forget, don't block response)
+    if (role === "customer" && email) {
+      const template = emailTemplates.customerWelcome(displayName || "Traveler");
+      sendEmail(email, template).catch(err => console.error("Welcome email failed:", err));
+    }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {

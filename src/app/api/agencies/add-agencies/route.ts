@@ -1,6 +1,7 @@
 import { app } from "@/lib/firebase";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { NextResponse } from "next/server";
+import { sendEmail, emailTemplates } from "@/lib/email";
 
 const db = getFirestore(app)
 
@@ -27,6 +28,12 @@ export async function POST(req: any) {
         }, {
             merge: true,
         });
+
+        // Send welcome email to agency (fire-and-forget, don't block response)
+        if (body.email) {
+            const template = emailTemplates.agencyWelcome(body.name || "Agency");
+            sendEmail(body.email, template).catch(err => console.error("Agency welcome email failed:", err));
+        }
 
         return NextResponse.json(
             { success: true, uid, result: result },

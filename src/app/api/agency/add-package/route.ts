@@ -1,6 +1,6 @@
 import { app } from "@/lib/firebase";
 import { randomUUID } from "crypto";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { NextResponse } from "next/server";
 
 const db = getFirestore(app)
@@ -17,10 +17,20 @@ export async function POST(req: any) {
     let error = null;
 
     try {
+        // Fetch agency name from agency document
+        let agencyName = "Travel Agency";
+        if (body.agencyId) {
+            const agencyDoc = await getDoc(doc(db, "agencies", body.agencyId));
+            if (agencyDoc.exists()) {
+                agencyName = agencyDoc.data().agencyName || agencyDoc.data().name || "Travel Agency";
+            }
+        }
+
         const packageId = randomUUID();
         result = await setDoc(doc(db, "packages", packageId), {
             packageId,
             agencyId: body.agencyId,
+            agencyName: body.agencyName || agencyName,
             title: body.title,
             destination: body.destination,
             duration: body.duration,

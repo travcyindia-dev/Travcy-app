@@ -54,7 +54,7 @@ function PackageDetail({ params }: { params: { id: string } }) {
 
               <div className="pt-4 border-t space-y-2">
                 <p className="text-sm text-muted-foreground">Starting from</p>
-                <p className="text-4xl font-bold text-primary">$3,200</p>
+                <p className="text-4xl font-bold text-primary">₹3,200</p>
                 <p className="text-xs text-muted-foreground">per person</p>
               </div>
 

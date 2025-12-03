@@ -5,7 +5,7 @@ import { useAuthContext } from "@/context/AuthContext"
 import { useBookingStore, Booking } from "@/store/bookingStore"
 import { usePackageStore } from "@/store/packageStore"
 import axios from "axios"
-import { Calendar, MapPin, Users, ChevronRight, X, AlertTriangle, Check, Edit3, Phone, Mail, User, FileText } from "lucide-react"
+import { Calendar, MapPin, Users, ChevronRight, X, AlertTriangle, Check, Edit3, Phone, Mail, User, FileText, Star, MessageSquare } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toastSuccess, toastError } from "@/components/ui/ToastTypes"
 
@@ -338,13 +338,162 @@ function ManageBookingContent({
   );
 }
 
+// Write Review Modal Content
+function WriteReviewContent({ 
+  booking, 
+  packageInfo,
+  user,
+  onClose, 
+  onSuccess 
+}: { 
+  booking: Booking; 
+  packageInfo: any;
+  user: any;
+  onClose: () => void; 
+  onSuccess: () => void;
+}) {
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [title, setTitle] = useState("");
+  const [comment, setComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (rating === 0) {
+      toastError("Please select a rating");
+      return;
+    }
+    if (!comment.trim()) {
+      toastError("Please write a review");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await axios.post("/api/reviews", {
+        packageId: booking.packageId,
+        userId: user?.uid,
+        userName: user?.displayName || booking.fullName,
+        userPhoto: user?.photoURL || null,
+        rating,
+        title,
+        comment,
+        bookingId: booking.bookingId,
+      });
+
+      if (res.data.success) {
+        toastSuccess("Review submitted successfully!");
+        onSuccess();
+        onClose();
+      } else {
+        toastError(res.data.error || "Failed to submit review");
+      }
+    } catch (error: any) {
+      console.error("Error submitting review:", error);
+      toastError(error.response?.data?.error || "Failed to submit review");
+    }
+    setIsSubmitting(false);
+  };
+
+  return (
+    <div className="p-6 space-y-6">
+      {/* Package Info */}
+      <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl p-4">
+        <h3 className="font-bold text-lg">{packageInfo?.title || "Travel Package"}</h3>
+        <p className="text-muted-foreground text-sm mt-1">{booking.destination}</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          {booking.startDate} - {booking.endDate}
+        </p>
+      </div>
+
+      {/* Star Rating */}
+      <div className="space-y-2">
+        <label className="text-sm font-semibold">Your Rating *</label>
+        <div className="flex gap-2">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              onClick={() => setRating(star)}
+              onMouseEnter={() => setHoverRating(star)}
+              onMouseLeave={() => setHoverRating(0)}
+              className="p-1 transition-transform hover:scale-110"
+            >
+              <Star
+                className={`w-8 h-8 transition-colors ${
+                  star <= (hoverRating || rating)
+                    ? "fill-amber-400 text-amber-400"
+                    : "text-gray-300"
+                }`}
+              />
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {rating === 1 && "Poor"}
+          {rating === 2 && "Fair"}
+          {rating === 3 && "Good"}
+          {rating === 4 && "Very Good"}
+          {rating === 5 && "Excellent"}
+        </p>
+      </div>
+
+      {/* Review Title */}
+      <div className="space-y-2">
+        <label className="text-sm font-semibold">Review Title (Optional)</label>
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Sum up your experience..."
+          maxLength={100}
+          className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+        />
+      </div>
+
+      {/* Review Comment */}
+      <div className="space-y-2">
+        <label className="text-sm font-semibold">Your Review *</label>
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="Tell others about your experience..."
+          rows={4}
+          maxLength={1000}
+          className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+        />
+        <p className="text-xs text-muted-foreground text-right">{comment.length}/1000</p>
+      </div>
+
+      {/* Submit Buttons */}
+      <div className="flex gap-3 pt-2">
+        <button
+          onClick={onClose}
+          className="flex-1 py-3 border border-border rounded-lg font-semibold hover:bg-muted transition"
+          disabled={isSubmitting}
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting || rating === 0 || !comment.trim()}
+          className="flex-1 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition disabled:opacity-50"
+        >
+          {isSubmitting ? "Submitting..." : "Submit Review"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Bookings() {
   const { user } = useAuthContext();
   const { setBookings, bookings, setHasFetchedOnce, hasFetchedOnce } = useBookingStore();
   const { packages } = usePackageStore();
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  const [modalType, setModalType] = useState<"view" | "manage" | null>(null);
+  const [modalType, setModalType] = useState<"view" | "manage" | "review" | null>(null);
   const [activeTab, setActiveTab] = useState<"upcoming" | "completed">("upcoming");
+  const [userReviews, setUserReviews] = useState<Record<string, boolean>>({});
 
   console.log("bookings:", bookings);
 
@@ -374,10 +523,43 @@ function Bookings() {
     setModalType("manage");
   };
 
+  const openReview = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setModalType("review");
+  };
+
   const closeModal = () => {
     setSelectedBooking(null);
     setModalType(null);
   };
+
+  // Check which packages the user has already reviewed
+  const checkUserReviews = async () => {
+    if (!user?.uid || bookings.length === 0) return;
+    
+    const packageIds = [...new Set(bookings.map(b => b.packageId))];
+    const reviewedMap: Record<string, boolean> = {};
+    
+    for (const packageId of packageIds) {
+      try {
+        const res = await axios.get(`/api/reviews?packageId=${packageId}`);
+        if (res.data.success) {
+          const hasReviewed = res.data.reviews.some((r: any) => r.userId === user.uid);
+          reviewedMap[packageId] = hasReviewed;
+        }
+      } catch (error) {
+        console.error("Error checking reviews:", error);
+      }
+    }
+    
+    setUserReviews(reviewedMap);
+  };
+
+  useEffect(() => {
+    if (bookings.length > 0 && user?.uid) {
+      checkUserReviews();
+    }
+  }, [bookings, user]);
 
   const handleUpdateBooking = async (updates: Partial<Booking>) => {
     if (!selectedBooking) return;
@@ -428,12 +610,21 @@ function Bookings() {
     }
   };
 
+  // Helper function to check if a trip has ended
+  const isTripCompleted = (endDate: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tripEndDate = new Date(endDate);
+    tripEndDate.setHours(0, 0, 0, 0);
+    return tripEndDate < today;
+  };
+
   // Filter bookings based on tab
   const upcomingBookings = bookings.filter(
-    (b) => !b.cancelled && b.status !== "cancelled" && b.status !== "completed"
+    (b) => !b.cancelled && b.status !== "cancelled" && b.status !== "completed" && !isTripCompleted(b.endDate)
   );
   const completedBookings = bookings.filter(
-    (b) => b.cancelled || b.status === "cancelled" || b.status === "completed"
+    (b) => b.cancelled || b.status === "cancelled" || b.status === "completed" || isTripCompleted(b.endDate)
   );
 
   const displayedBookings = activeTab === "upcoming" ? upcomingBookings : completedBookings;
@@ -514,19 +705,19 @@ function Bookings() {
                     <p
                       className={`text-sm font-semibold mt-1 ${booking.cancelled || booking.status === "cancelled"
                         ? "text-red-600"
-                        : booking.status === "confirmed"
-                          ? "text-green-600"
-                          : booking.status === "completed"
-                            ? "text-blue-600"
+                        : booking.status === "completed" || isTripCompleted(booking.endDate)
+                          ? "text-blue-600"
+                          : booking.status === "confirmed"
+                            ? "text-green-600"
                             : "text-muted-foreground"
                         }`}
                     >
                       {booking.cancelled || booking.status === "cancelled"
                         ? "✗ Cancelled"
-                        : booking.status === "confirmed"
-                          ? "✓ Confirmed"
-                          : booking.status === "completed"
-                            ? "✓ Completed"
+                        : booking.status === "completed" || isTripCompleted(booking.endDate)
+                          ? "✓ Completed"
+                          : booking.status === "confirmed"
+                            ? "✓ Confirmed"
                             : booking.status}
                     </p>
                   </div>
@@ -540,13 +731,29 @@ function Bookings() {
                     View Details
                   </button>
 
-                  {!booking.cancelled && booking.status !== "cancelled" && (
+                  {!booking.cancelled && booking.status !== "cancelled" && !isTripCompleted(booking.endDate) && (
                     <button
                       onClick={() => openManage(booking)}
                       className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition flex items-center justify-center gap-2"
                     >
                       Manage <ChevronRight className="w-4 h-4" />
                     </button>
+                  )}
+
+                  {/* Write Review button for completed trips */}
+                  {!booking.cancelled && booking.status !== "cancelled" && isTripCompleted(booking.endDate) && (
+                    userReviews[booking.packageId] ? (
+                      <div className="flex-1 px-4 py-2 bg-green-50 text-green-600 rounded-lg font-semibold flex items-center justify-center gap-2">
+                        <Check className="w-4 h-4" /> Reviewed
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => openReview(booking)}
+                        className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg font-semibold hover:bg-amber-600 transition flex items-center justify-center gap-2"
+                      >
+                        <Star className="w-4 h-4" /> Write Review
+                      </button>
+                    )
                   )}
                 </div>
               </div>
@@ -582,6 +789,25 @@ function Bookings() {
             onClose={closeModal}
             onUpdate={handleUpdateBooking}
             onCancel={handleCancelBooking}
+          />
+        )}
+      </Modal>
+
+      {/* Write Review Modal */}
+      <Modal
+        isOpen={modalType === "review" && selectedBooking !== null}
+        onClose={closeModal}
+        title="Write a Review"
+      >
+        {selectedBooking && (
+          <WriteReviewContent
+            booking={selectedBooking}
+            packageInfo={packages.find((p) => p.id === selectedBooking.packageId)}
+            user={user}
+            onClose={closeModal}
+            onSuccess={() => {
+              setUserReviews(prev => ({ ...prev, [selectedBooking.packageId]: true }));
+            }}
           />
         )}
       </Modal>

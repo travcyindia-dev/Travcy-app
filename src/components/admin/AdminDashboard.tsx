@@ -66,7 +66,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ agencies, onVeri
               <Card className="p-6 border-l-4 border-l-blue-500 flex justify-between items-center">
                 <div>
                   <p className="text-sm text-slate-500 font-medium">Total Revenue</p>
-                  <h3 className="text-3xl font-bold mt-1 text-slate-900">$42,500</h3>
+                  <h3 className="text-3xl font-bold mt-1 text-slate-900">₹42,500</h3>
                 </div>
                 <div className="p-3 bg-blue-50 rounded-full text-blue-600"><DollarSign className="w-6 h-6"/></div>
               </Card>
