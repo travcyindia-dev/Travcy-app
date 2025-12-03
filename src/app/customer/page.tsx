@@ -1,6 +1,6 @@
 "use client"
 
-import { SearchIcon, MapPin, Calendar, ChevronRight, Clock, Star, Heart, ImageIcon } from "lucide-react"
+import { SearchIcon, MapPin, Calendar, ChevronRight, Clock, Star, Heart, ImageIcon, Building2 } from "lucide-react"
 import Link from "next/link"
 import axios from "axios"
 import { useState, useEffect } from "react"
@@ -94,16 +94,40 @@ function SearchDestinations() {
           duration: data.duration || 0,
           price: data.price || 0,
           maxTravellers: data.maxTravellers || 0,
+          agencyName: data.agencyName || "",
+          agencyId: data.agencyId || "",
+          description: data.description || "",
           ...data,
         };
       });
 
-      // console.log('packages:', packagesData);
+      // Fetch agency names for packages that don't have them
+      const packagesWithAgency = await Promise.all(
+        packagesData.map(async (pkg) => {
+          if (!pkg.agencyName && pkg.agencyId) {
+            try {
+              const agencySnap = await getDocs(
+                query(collection(db, "agencies"), where("uid", "==", pkg.agencyId))
+              );
+              if (!agencySnap.empty) {
+                const agencyData = agencySnap.docs[0].data();
+                return {
+                  ...pkg,
+                  agencyName: agencyData.agencyName || agencyData.name || "Travel Agency",
+                };
+              }
+            } catch (e) {
+              console.error("Error fetching agency:", e);
+            }
+          }
+          return pkg;
+        })
+      );
+
       // Store in Zustand
-      setPackages(packagesData);
+      setPackages(packagesWithAgency);
 
-
-      return packagesData;
+      return packagesWithAgency;
     } catch (error) {
       console.error("Failed to fetch packages:", error);
       return [];
@@ -223,17 +247,27 @@ function SearchDestinations() {
                     <div className="p-5 flex flex-col flex-1">
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="font-bold text-lg text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">
-                          {pkg.destination} Adventure
+                          {pkg.title || `${pkg.destination} Adventure`}
                         </h3>
                       </div>
-                      <p className="text-sm text-slate-500 mb-4 line-clamp-2">Hosted by {pkg.agencyName || "Unknown Agency"}. An immersive experience into the heart of {pkg.destination}.</p>
+                      
+                      {/* Agency Info */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
+                          <Building2 className="w-3.5 h-3.5 text-primary" />
+                        </div>
+                        <span className="text-sm text-slate-600 font-medium">{pkg.agencyName || "Travel Agency"}</span>
+                      </div>
+                      
+                      <p className="text-sm text-slate-500 mb-4 line-clamp-2">{pkg.description || `An immersive experience into the heart of ${pkg.destination}.`}</p>
 
                       <div className="flex items-center gap-4 text-xs font-medium text-slate-500 mb-6">
                         <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded">
                           <Clock className="w-3.5 h-3.5" /> {pkg.duration} Days
                         </div>
                         <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded">
-                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> {pkg.rating || "N/A"}
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> 
+                          {pkg.rating ? `${Number(pkg.rating).toFixed(1)} (${pkg.reviewCount || 0})` : "New"}
                         </div>
                       </div>
 
@@ -241,7 +275,7 @@ function SearchDestinations() {
                         <div>
                           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">From</p>
                           <div className="flex items-baseline gap-1">
-                            <span className="font-bold text-xl text-slate-900">${pkg.price}</span>
+                            <span className="font-bold text-xl text-slate-900">₹{pkg.price}</span>
                             <span className="text-xs text-slate-400">/person</span>
                           </div>
                         </div>
@@ -289,17 +323,27 @@ function SearchDestinations() {
                   <div className="p-5 flex flex-col flex-1">
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-bold text-lg text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">
-                        {pkg.destination} Adventure
+                        {pkg.title || `${pkg.destination} Adventure`}
                       </h3>
                     </div>
-                    <p className="text-sm text-slate-500 mb-4 line-clamp-2">Hosted by {pkg.agencyName || "Unknown Agency"}. An immersive experience into the heart of {pkg.destination}.</p>
+                    
+                    {/* Agency Info */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
+                        <Building2 className="w-3.5 h-3.5 text-primary" />
+                      </div>
+                      <span className="text-sm text-slate-600 font-medium">{pkg.agencyName || "Travel Agency"}</span>
+                    </div>
+                    
+                    <p className="text-sm text-slate-500 mb-4 line-clamp-2">{pkg.description || `An immersive experience into the heart of ${pkg.destination}.`}</p>
 
                     <div className="flex items-center gap-4 text-xs font-medium text-slate-500 mb-6">
                       <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded">
                         <Clock className="w-3.5 h-3.5" /> {pkg.duration} Days
                       </div>
                       <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded">
-                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> {pkg.rating || "N/A"}
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> 
+                        {pkg.rating ? `${Number(pkg.rating).toFixed(1)} (${pkg.reviewCount || 0})` : "New"}
                       </div>
                     </div>
 
@@ -307,7 +351,7 @@ function SearchDestinations() {
                       <div>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">From</p>
                         <div className="flex items-baseline gap-1">
-                          <span className="font-bold text-xl text-slate-900">${pkg.price}</span>
+                          <span className="font-bold text-xl text-slate-900">₹{pkg.price}</span>
                           <span className="text-xs text-slate-400">/person</span>
                         </div>
                       </div>

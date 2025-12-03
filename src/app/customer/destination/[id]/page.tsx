@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Star, MapPin, ImageIcon, Check, ShieldCheck, X } from "lucide-react"
+import { Star, MapPin, ImageIcon, Check, ShieldCheck, X, Loader2 } from "lucide-react"
 import isAuth from "@/components/isAuth"
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -14,6 +14,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import Razorpay from "razorpay";
 import { useBookingStore } from "@/store/bookingStore";
 import Router from "next/router";
+import { ReviewForm, ReviewList, ReviewSummary } from "@/components/reviews/ReviewComponents";
 
 interface ItineraryDay {
   day: number;
@@ -51,10 +52,6 @@ const getDefaultDetails = () => ({
     { day: 4, title: 'Cultural Immersion', description: 'Cooking class, traditional dance show, and village visit.' },
     { day: 5, title: 'Departure', description: 'Breakfast and transfer to airport with souvenirs.' },
   ],
-  reviews: [
-    { user: 'Sarah M.', rating: 5, comment: 'Absolutely wonderful experience! Highly recommended.' },
-    { user: 'John D.', rating: 4, comment: 'Great guide, but the hotel was a bit far from the center.' }
-  ]
 });
 
 
@@ -70,6 +67,13 @@ function DestinationPage({ params }: { params: Promise<{ id: string }> }) {
   const [rzr_pay_signature, set_rzr_pay_signature] = useState("");
   const { setBookings, addBooking } = useBookingStore();
   const defaultDetails = getDefaultDetails();
+  
+  // Reviews state
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewStats, setReviewStats] = useState({ totalReviews: 0, averageRating: 0 });
+  const [isLoadingReviews, setIsLoadingReviews] = useState(false);
+  const [hasUserBooked, setHasUserBooked] = useState(false);
+  const [hasUserReviewed, setHasUserReviewed] = useState(false);
 
   async function getPackageById() {
     const docRef = doc(db, "packages", id);
@@ -97,12 +101,57 @@ function DestinationPage({ params }: { params: Promise<{ id: string }> }) {
     }
   }, [Packages, id]);
 
+  // Fetch reviews
+  const fetchReviews = async () => {
+    setIsLoadingReviews(true);
+    try {
+      const res = await axios.get(`/api/reviews?packageId=${id}`);
+      if (res.data.success) {
+        setReviews(res.data.reviews);
+        setReviewStats(res.data.stats);
+        // Check if current user has already reviewed
+        if (user) {
+          const userReview = res.data.reviews.find((r: any) => r.userId === user.uid);
+          setHasUserReviewed(!!userReview);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    } finally {
+      setIsLoadingReviews(false);
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      fetchReviews();
+    }
+  }, [id]);
+
+  // Check if user has booked this package
+  useEffect(() => {
+    const checkUserBooking = async () => {
+      if (!user) return;
+      try {
+        const res = await axios.get(`/api/bookings/fetch-booking/${user.uid}`);
+        if (res.data.bookings) {
+          const hasBooking = res.data.bookings.some(
+            (b: any) => b.packageId === id && b.status === "confirmed" && !b.cancelled
+          );
+          setHasUserBooked(hasBooking);
+        }
+      } catch (error) {
+        console.error("Error checking booking:", error);
+      }
+    };
+    checkUserBooking();
+  }, [user, id]);
+
   // Get package details - use real data if available, fallback to defaults
   const inclusions = pkg?.inclusions?.length ? pkg.inclusions : defaultDetails.inclusions;
   const exclusions = pkg?.exclusions || [];
   const highlights = pkg?.highlights || [];
   const itinerary = pkg?.itinerary?.length ? pkg.itinerary : defaultDetails.itinerary;
-  const reviews = defaultDetails.reviews; // Reviews would come from a separate collection in a real app
 
   return (
     <div className="">
@@ -142,7 +191,11 @@ function DestinationPage({ params }: { params: Promise<{ id: string }> }) {
                   <span className="font-medium text-blue-600">{pkg?.name || "Verified Agency"}</span>
                   <span>•</span>
                   <div className="flex items-center text-amber-500">
-                    <Star className="w-3 h-3 fill-current" /> {pkg?.rating || 'New'}
+                    <Star className="w-3 h-3 fill-current" /> 
+                    <span className="ml-1">{reviewStats.averageRating > 0 ? reviewStats.averageRating.toFixed(1) : (pkg?.rating || 'New')}</span>
+                    {reviewStats.totalReviews > 0 && (
+                      <span className="text-slate-400 ml-1">({reviewStats.totalReviews})</span>
+                    )}
                   </div>
                 </div>
 
@@ -267,26 +320,46 @@ function DestinationPage({ params }: { params: Promise<{ id: string }> }) {
                 )}
 
                 {activeTab === 'reviews' && (
-                  <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
-                    {pkg?.reviewCount === 0 || !pkg?.reviewCount ? (
-                      <div className="text-center py-12 text-slate-500">
-                        <Star className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                        <p>No reviews yet. Be the first to review this package!</p>
-                      </div>
-                    ) : (
-                      reviews.map((review, i) => (
-                        <div key={i} className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                          <div className="flex justify-between items-start mb-2">
-                            <span className="font-bold text-slate-900 text-sm">{review.user}</span>
-                            <div className="flex text-amber-500">
-                              <Star className="w-3 h-3 fill-current" />
-                              <span className="text-xs ml-1 text-slate-600">{review.rating}.0</span>
-                            </div>
-                          </div>
-                          <p className="text-sm text-slate-600 italic">"{review.comment}"</p>
-                        </div>
-                      ))
+                  <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+                    {/* Review Summary */}
+                    {reviewStats.totalReviews > 0 && (
+                      <ReviewSummary 
+                        averageRating={reviewStats.averageRating} 
+                        totalReviews={reviewStats.totalReviews} 
+                      />
                     )}
+
+                    {/* Review Form - only show if user has booked and hasn't reviewed yet */}
+                    {user && hasUserBooked && !hasUserReviewed && (
+                      <ReviewForm
+                        packageId={id}
+                        userId={user.uid}
+                        userName={user.displayName || "Anonymous"}
+                        userPhoto={user.photoURL}
+                        onReviewAdded={fetchReviews}
+                      />
+                    )}
+
+                    {/* Message for users who haven't booked */}
+                    {user && !hasUserBooked && !hasUserReviewed && (
+                      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center">
+                        <p className="text-blue-700 text-sm">
+                          📌 Book this package to leave a review after your trip!
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Message for users who have already reviewed */}
+                    {user && hasUserReviewed && (
+                      <div className="bg-green-50 border border-green-100 rounded-xl p-4 text-center">
+                        <p className="text-green-700 text-sm">
+                          ✅ Thank you for your review!
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Reviews List */}
+                    <ReviewList reviews={reviews} isLoading={isLoadingReviews} />
                   </div>
                 )}
 

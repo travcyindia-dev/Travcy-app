@@ -73,7 +73,7 @@ export const AgencyPortal: React.FC<AgencyPortalProps> = ({ agency, bookings, on
            {/* Starter Plan */}
            <Card className="p-8 hover:border-blue-300 transition-all cursor-pointer">
              <h3 className="font-bold text-xl text-slate-900">Starter</h3>
-             <p className="text-3xl font-bold mt-4 mb-6">$29<span className="text-base font-normal text-slate-500">/mo</span></p>
+             <p className="text-3xl font-bold mt-4 mb-6">₹2,499<span className="text-base font-normal text-slate-500">/mo</span></p>
              <ul className="space-y-3 mb-8 text-slate-600 text-sm">
                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-500"/> List up to 5 packages</li>
                <li className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-emerald-500"/> Basic Analytics</li>
@@ -86,7 +86,7 @@ export const AgencyPortal: React.FC<AgencyPortalProps> = ({ agency, bookings, on
            <Card className="p-8 border-2 border-blue-600 relative bg-blue-50/20">
              <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs px-3 py-1 rounded-bl-lg font-bold">MOST POPULAR</div>
              <h3 className="font-bold text-xl text-blue-900">Professional</h3>
-             <p className="text-3xl font-bold mt-4 mb-6">$79<span className="text-base font-normal text-slate-500">/mo</span></p>
+             <p className="text-3xl font-bold mt-4 mb-6">₹6,499<span className="text-base font-normal text-slate-500">/mo</span></p>
              <ul className="space-y-3 mb-8 text-slate-700 text-sm">
                <li className="flex items-center gap-2 font-bold"><CheckCircle className="w-4 h-4 text-blue-600"/> Unlimited packages</li>
                <li className="flex items-center gap-2 font-bold"><CheckCircle className="w-4 h-4 text-blue-600"/> Priority Listing</li>
@@ -219,7 +219,7 @@ export const AgencyPortal: React.FC<AgencyPortalProps> = ({ agency, bookings, on
                 <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600"><DollarSign className="w-6 h-6"/></div>
                 <div>
                   <p className="text-xs text-slate-500 font-bold uppercase">Revenue</p>
-                  <p className="text-2xl font-bold">$12,450</p>
+                  <p className="text-2xl font-bold">₹12,450</p>
                 </div>
              </Card>
              <Card className="p-5 flex items-center gap-4 border-l-4 border-l-amber-500">

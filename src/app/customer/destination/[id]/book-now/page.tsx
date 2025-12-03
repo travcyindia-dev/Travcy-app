@@ -114,6 +114,11 @@ export default function BookingForm({ params }: { params:{ id: string }}) {
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [isLoading, setIsLoading] = useState(false)
 
+    // Calculate total price based on number of travelers
+    const numberOfTravelers = parseInt(formData.numberOfTravelers) || 1;
+    const basePrice = Number(pkg?.price) || 0;
+    const totalPrice = basePrice * numberOfTravelers;
+
 
     // const details = getPackageDetails();
     async function getPackageById() {
@@ -236,9 +241,14 @@ export default function BookingForm({ params }: { params:{ id: string }}) {
 
         setIsLoading(true);
         try {
+            // Calculate total amount based on number of travelers
+            const travelers = parseInt(formData.numberOfTravelers) || 1;
+            const pricePerPerson = Number(pkg.price);
+            const totalAmount = pricePerPerson * travelers;
+            
             // creating orders
             const result = await axios.post('/api/bookings/order', {
-                amount: pkg.price
+                amount: totalAmount
             })
             console.log("result from order created:", result);
             const order_id = result.data.response.id;
@@ -246,14 +256,14 @@ export default function BookingForm({ params }: { params:{ id: string }}) {
             set_order_id(order_id);
             // integration with checkout on client-side
             // Amount must be in paise (smallest currency unit) - same as what was sent to create order
-            const amountInPaise = Math.round(Number(pkg.price) * 100);
+            const amountInPaise = Math.round(totalAmount * 100);
             
             let options = {
                 "key": process.env.NEXT_PUBLIC_RAZOR_PAY_TEST_API_KEY || "", // Enter the Key ID generated from the Dashboard
                 "amount": amountInPaise, // Amount is in currency subunits (paise)
                 "currency": "INR",
                 "name": "Acme Corp", //your business name
-                "description": "Test Transaction",
+                "description": `${pkg.title || pkg.destination} - ${travelers} Traveler(s)`,
 
                 "order_id": order_id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
                 "handler": async function (response: any) {
@@ -274,14 +284,14 @@ export default function BookingForm({ params }: { params:{ id: string }}) {
                                 userId: user?.uid,
                                 packageId: id,
                                 agencyId: pkg.agencyId,
-                                amount: pkg.price,
+                                amount: totalAmount,
                                 booking: {
                                     bookingId: `BK-${Date.now()}`,
                                     fullName: formData.fullName,
                                     email: formData.email,
                                     phoneNumber: formData.phoneNumber,
 
-                                    numberOfTravelers: Number.parseInt(formData.numberOfTravelers),
+                                    numberOfTravelers: travelers,
                                     startDate: formData.startDate,
                                     endDate: formData.endDate,
                                     accommodation: formData.accommodation,
@@ -290,6 +300,7 @@ export default function BookingForm({ params }: { params:{ id: string }}) {
                                     status: "Confirmed",
                                 },
                                 destination: pkg.destination,
+                                packageTitle: pkg.title || pkg.destination,
 
 
                             });
@@ -470,6 +481,29 @@ console.log("formdata:",formData);
                 </div>
             </div>
 
+            {/* Price Summary */}
+            {pkg && (
+                <div className="mt-8 bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl p-6 border border-primary/20">
+                    <h2 className="text-xl font-semibold text-foreground mb-4">Price Summary</h2>
+                    <div className="space-y-3">
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-muted-foreground">Base price per person</span>
+                            <span className="font-medium">₹{basePrice.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-muted-foreground">Number of travelers</span>
+                            <span className="font-medium">× {numberOfTravelers}</span>
+                        </div>
+                        <div className="border-t border-primary/20 pt-3 mt-3">
+                            <div className="flex justify-between items-center">
+                                <span className="text-lg font-semibold">Total Amount</span>
+                                <span className="text-2xl font-bold text-primary">₹{totalPrice.toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Submit Button */}
             <div className="mt-8 flex gap-4">
                 <button
@@ -477,7 +511,7 @@ console.log("formdata:",formData);
                     disabled={isLoading}
                     className="flex-1 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {isLoading ? "Creating Booking..." : "Create Booking"}
+                    {isLoading ? "Processing..." : `Pay ₹${totalPrice.toLocaleString()} & Book Now`}
                 </button>
             </div>
         </form>

@@ -8,19 +8,19 @@ const destinations = [
   {
     name: "Paradise Beach",
     country: "Bali",
-    price: "$899",
+    price: "₹899",
     image: "/bali-tropical-paradise-beach.jpg",
   },
   {
     name: "Mountain Peak",
     country: "Himalayas",
-    price: "$1,299",
+    price: "₹1,299",
     image: "/himalayan-mountain-peak.jpg",
   },
   {
     name: "Cultural Gem",
     country: "Japan",
-    price: "$1,099",
+    price: "₹1,099",
     image: "/japan-temple-culture.jpg",
   },
 ]
