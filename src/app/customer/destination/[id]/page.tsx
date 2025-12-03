@@ -26,9 +26,9 @@ interface PackageData {
   packageId?: string;
   title?: string;
   destination?: string;
-  duration?: string;
-  price?: string;
-  maxTravellers?: string;
+  duration?: string | number;
+  price?: string | number;
+  maxTravellers?: string | number;
   description?: string;
   imgUrl?: string;
   highlights?: string[];
@@ -129,7 +129,7 @@ function DestinationPage({ params }: { params: Promise<{ id: string }> }) {
                   </div>
                 )}
                 <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-                  {pkg?.duration || '5'} Days / {Math.max(0, parseInt(pkg?.duration || '5') - 1)} Nights
+                  {pkg?.duration || '5'} Days / {Math.max(0, Number(pkg?.duration || 5) - 1)} Nights
                 </div>
               </div>
               <div className="p-6 flex-1 flex flex-col">
