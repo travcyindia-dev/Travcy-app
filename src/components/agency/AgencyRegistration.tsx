@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, Input, Button } from '../ui/Shared';
 import { Agency } from '../../types';
 import { FileText, ShieldCheck, Loader2 } from 'lucide-react';
+import { toastError } from '../ui/ToastTypes';
 
 interface RegistrationProps {
   onCancel: () => void;
@@ -28,13 +29,13 @@ export const AgencyRegistrationForm: React.FC<RegistrationProps> = ({ onCancel, 
 
   const handleNext = () => {
     if (step === 1) {
-        if (!formData.name || !formData.location || !formData.email) return alert("Please fill in required fields");
+        if (!formData.name || !formData.location || !formData.email) return toastError("Please fill in required fields");
         setStep(2);
     }
   };
 
   const handleSubmit = () => {
-    if(!formData.taxId) return alert("Tax ID is required for verification");
+    if(!formData.taxId) return toastError("Tax ID is required for verification");
     setLoading(true);
     
     // Simulate API delay

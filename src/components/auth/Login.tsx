@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Input, Button } from '../ui/Shared';
+import { toastError } from '../ui/ToastTypes';
 
 interface LoginProps {
   onLogin: (email: string, type: 'general' | 'agency') => void;
@@ -11,7 +12,7 @@ export const UnifiedLogin: React.FC<LoginProps> = ({ onLogin, onRegisterAgency }
   const [email, setEmail] = useState('');
   
   const handleSubmit = () => {
-    if(!email) return alert("Please enter an email");
+    if(!email) return toastError("Please enter an email");
     onLogin(email, activeTab);
   };
 
