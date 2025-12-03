@@ -26,6 +26,10 @@ export default function AgencyLogin() {
   const [resetEmail, setResetEmail] = useState('');
   const [isResetting, setIsResetting] = useState(false);
   
+  // Google login state
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [googleLoadingMessage, setGoogleLoadingMessage] = useState('');
+  
   // Enhanced signup fields
   const [phone, setPhone] = useState('');
   const [website, setWebsite] = useState('');
@@ -480,11 +484,24 @@ export default function AgencyLogin() {
           {/* Google Login */}
           <button 
             type="button"
-            className="w-full py-3 border border-border rounded-lg hover:bg-muted transition flex items-center justify-center gap-2 font-semibold" 
-            onClick={() => handleGoogleAgencyAuth(router, isSignup ? "signup" : "login")}
+            disabled={isGoogleLoading || isLoading}
+            className="w-full py-3 border border-border rounded-lg hover:bg-muted transition flex items-center justify-center gap-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed" 
+            onClick={() => handleGoogleAgencyAuth(router, isSignup ? "signup" : "login", {
+              setIsGoogleLoading,
+              setLoadingMessage: setGoogleLoadingMessage
+            })}
           >
-            <Chrome className="w-5 h-5" />
-            {!isSignup ? "Login with Google" : "Sign up with Google"}
+            {isGoogleLoading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                {googleLoadingMessage || "Please wait..."}
+              </>
+            ) : (
+              <>
+                <Chrome className="w-5 h-5" />
+                {!isSignup ? "Login with Google" : "Sign up with Google"}
+              </>
+            )}
           </button>
 
           {/* Toggle Signup/Login */}
@@ -500,6 +517,29 @@ export default function AgencyLogin() {
           </p>
         </form>
       </div>
+
+      {/* Google Loading Overlay */}
+      {isGoogleLoading && (
+        <div className="fixed inset-0 bg-white/95 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="text-center space-y-6 p-8">
+            <div className="relative">
+              <div className="w-20 h-20 border-4 border-primary/20 rounded-full mx-auto"></div>
+              <div className="w-20 h-20 border-4 border-primary border-t-transparent rounded-full mx-auto animate-spin absolute top-0 left-1/2 -translate-x-1/2"></div>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-semibold text-foreground">{googleLoadingMessage || "Please wait..."}</h3>
+              <p className="text-sm text-muted-foreground">
+                {isSignup ? "Setting up your agency account" : "Logging into your agency"}
+              </p>
+            </div>
+            <div className="flex justify-center gap-1">
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Forgot Password Modal */}
       {showForgotPassword && (
