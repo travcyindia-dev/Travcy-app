@@ -1,4 +1,4 @@
-import { getFirestore } from "firebase-admin/firestore";
+import { admin } from "@/lib/firebaseAdmin";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
@@ -9,13 +9,14 @@ export async function GET(req: Request) {
     if (!agencyId) {
       return NextResponse.json({ error: "Missing agencyId" }, { status: 400 });
     }
-    const firestore=getFirestore()
+    
+    const firestore = admin.firestore();
     const snap = await firestore
       .collection("bookings")
       .where("agencyId", "==", agencyId)
       .get();
 
-    const bookings = snap.docs.map((d:any) => ({ id: d.id, ...d.data() }));
+    const bookings = snap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
 
     return NextResponse.json({ bookings });
   } catch (err) {

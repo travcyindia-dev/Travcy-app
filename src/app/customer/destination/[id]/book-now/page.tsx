@@ -245,9 +245,12 @@ export default function BookingForm({ params }: { params:{ id: string }}) {
             console.log("order id:", order_id);
             set_order_id(order_id);
             // integration with checkout on client-side
+            // Amount must be in paise (smallest currency unit) - same as what was sent to create order
+            const amountInPaise = Math.round(Number(pkg.price) * 100);
+            
             let options = {
                 "key": process.env.NEXT_PUBLIC_RAZOR_PAY_TEST_API_KEY || "", // Enter the Key ID generated from the Dashboard
-                "amount": pkg.price, // Amount is in currency subunits.
+                "amount": amountInPaise, // Amount is in currency subunits (paise)
                 "currency": "INR",
                 "name": "Acme Corp", //your business name
                 "description": "Test Transaction",

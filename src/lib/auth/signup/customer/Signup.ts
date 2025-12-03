@@ -12,8 +12,13 @@ export default async function signUp(email: string, password: string) {
     result = await createUserWithEmailAndPassword(auth, email, password);
     const uid = result.user.uid;
 
-    // 2. Call your server API to assign role
-    await axios.post("/api/assign-role", { uid, role: "customer" });
+    // 2. Call your server API to assign role and save user to Firestore
+    await axios.post("/api/assign-role", { 
+      uid, 
+      role: "customer",
+      email: email,
+      displayName: result.user.displayName || null
+    });
 
     // 3. Refresh token to include custom claims
     await result.user.getIdToken(true);
