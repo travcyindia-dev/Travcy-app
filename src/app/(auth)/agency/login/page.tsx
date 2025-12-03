@@ -1,10 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { Chrome, Building2, Mail, Phone, MapPin, Camera, Globe, FileText, Loader2 } from "lucide-react"
+import { Chrome, Building2, Mail, Phone, MapPin, Camera, Globe, FileText, Loader2, X } from "lucide-react"
 import React, { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createUserWithEmailAndPassword, onAuthStateChanged, updateProfile } from "firebase/auth"
+import { createUserWithEmailAndPassword, onAuthStateChanged, updateProfile, sendPasswordResetEmail } from "firebase/auth"
 import axios from "axios"
 import { toastError, toastSuccess } from "@/components/ui/ToastTypes"
 import signIn from "@/lib/auth/signin/SignIn"
@@ -20,6 +20,11 @@ export default function AgencyLogin() {
   const [isSignup, setIsSignup] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Forgot password state
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [isResetting, setIsResetting] = useState(false);
   
   // Enhanced signup fields
   const [phone, setPhone] = useState('');
@@ -191,6 +196,60 @@ export default function AgencyLogin() {
       }
     }
     setIsLoading(false);
+  }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!resetEmail.trim()) {
+      toastError("Please enter your email address");
+      return;
+    }
+
+    setIsResetting(true);
+
+    try {
+      console.log("Attempting to send password reset email to:", resetEmail);
+      
+      // Action code settings for password reset
+      const actionCodeSettings = {
+        url: window.location.origin + '/agency/login',
+        handleCodeInApp: false,
+      };
+      
+      await sendPasswordResetEmail(auth, resetEmail, actionCodeSettings);
+      console.log("Password reset email sent successfully");
+      toastSuccess("Password reset email sent! Check your inbox.");
+      setShowForgotPassword(false);
+      setResetEmail('');
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
+      
+      switch (error.code) {
+        case "auth/user-not-found":
+          toastError("No account found with this email address.");
+          break;
+        case "auth/invalid-email":
+          toastError("Please enter a valid email address.");
+          break;
+        case "auth/too-many-requests":
+          toastError("Too many requests. Please try again later.");
+          break;
+        case "auth/missing-android-pkg-name":
+        case "auth/missing-continue-uri":
+        case "auth/missing-ios-bundle-id":
+        case "auth/invalid-continue-uri":
+        case "auth/unauthorized-continue-uri":
+          toastError("App configuration error. Please contact support.");
+          break;
+        default:
+          toastError(error.message || "Failed to send reset email. Please try again.");
+      }
+    } finally {
+      setIsResetting(false);
+    }
   }
 
   // Show loading while checking authentication
@@ -379,9 +438,16 @@ export default function AgencyLogin() {
                 <input type="checkbox" className="w-4 h-4 border border-border rounded" />
                 <span>Remember me</span>
               </label>
-              <Link href="#" className="text-primary hover:opacity-80">
+              <button
+                type="button"
+                onClick={() => {
+                  setResetEmail(email);
+                  setShowForgotPassword(true);
+                }}
+                className="text-primary hover:opacity-80"
+              >
                 Forgot password?
-              </Link>
+              </button>
             </div>
           )}
 
@@ -434,6 +500,73 @@ export default function AgencyLogin() {
           </p>
         </form>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowForgotPassword(false)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md relative shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => {
+                setShowForgotPassword(false);
+                setResetEmail('');
+              }}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="text-center mb-6">
+              <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mail className="w-7 h-7 text-primary" />
+              </div>
+              <h2 className="text-xl font-bold">Reset Password</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Enter your agency email and we'll send you a link to reset your password.
+              </p>
+            </div>
+
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Agency Email</label>
+                <input
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  placeholder="agency@email.com"
+                  required
+                  className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isResetting}
+                className="w-full py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isResetting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  "Send Reset Link"
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForgotPassword(false);
+                  setResetEmail('');
+                }}
+                className="w-full py-3 text-muted-foreground hover:text-foreground transition font-medium"
+              >
+                Back to Login
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
