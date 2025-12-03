@@ -10,6 +10,7 @@ import { db } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
+import isAdmin from '@/components/isAdmin';
 
 interface AdminStats {
   totalRevenue: number;
@@ -40,7 +41,7 @@ interface PackageData {
   createdAt?: any;
 }
 
-export default function AdminDashboard() {
+function AdminDashboard() {
   const router = useRouter();
   const [agencies, setAgencies] = useState<any[]>([]);
   const [allAgencies, setAllAgencies] = useState<any[]>([]);
@@ -741,4 +742,6 @@ export default function AdminDashboard() {
       {selectedBooking && <BookingModal booking={selectedBooking} onClose={() => setSelectedBooking(null)} />}
     </div>
   );
-};
+}
+
+export default isAdmin(AdminDashboard);

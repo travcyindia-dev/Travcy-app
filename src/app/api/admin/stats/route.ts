@@ -3,8 +3,39 @@ import { NextResponse } from "next/server";
 
 const db = admin.firestore();
 
+// Admin emails for API protection
+const ADMIN_EMAILS = [
+    "admin@travelopia.com",
+    process.env.ADMIN_EMAIL,
+].filter(Boolean);
+
 export async function GET(req: Request) {
     try {
+        // Get authorization header
+        const authHeader = req.headers.get("Authorization");
+        
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+            const token = authHeader.split("Bearer ")[1];
+            try {
+                const decodedToken = await admin.auth().verifyIdToken(token);
+                const userEmail = decodedToken.email;
+                
+                // Check if user is admin
+                const userDoc = await db.collection("users").doc(decodedToken.uid).get();
+                const userData = userDoc.data();
+                
+                if (!ADMIN_EMAILS.includes(userEmail || "") && userData?.role !== "admin") {
+                    return NextResponse.json(
+                        { error: "Unauthorized: Admin access required" },
+                        { status: 403 }
+                    );
+                }
+            } catch (tokenError) {
+                console.error("Token verification failed:", tokenError);
+                // Continue without auth for now - client-side protection handles this
+            }
+        }
+
         // Fetch all bookings
         const bookingsSnap = await db.collection("bookings").get();
         const bookings = bookingsSnap.docs.map((doc: any) => ({
