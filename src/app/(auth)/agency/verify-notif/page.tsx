@@ -1,58 +1,48 @@
 "use client"
 
 import VerificationPending from "@/components/verification-pending"
-import { auth, db } from "@/lib/firebase"
-import { onAuthStateChanged } from "firebase/auth"
-import { doc, onSnapshot } from "firebase/firestore"
+import { useAgencyAuthContext } from "@/context/AgencyAuthContext"
+import { auth } from "@/lib/firebase"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { toastSuccess } from "@/components/ui/ToastTypes"
 
-export default function Home() {
+export default function VerifyNotifPage() {
   const [mounted, setMounted] = useState(false)
+  const router = useRouter();
+  const hasRedirected = useRef(false);
+  const { user, agencyApproved } = useAgencyAuthContext();
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const router = useRouter();
   useEffect(() => {
-    let unsubDoc: (() => void) | null = null;
+    if (!mounted || hasRedirected.current) return;
 
-    const unsubAuth = onAuthStateChanged(auth, (user) => {
-      console.log("user:", user);
+    // If no user, redirect to login
+    if (user === null) {
+      hasRedirected.current = true;
+      router.replace("/agency/login");
+      return;
+    }
 
-      if (!user) {
-        router.replace("/agency/login");
-        return;
-      }
-
-      const agencyRef = doc(db, "agencies", user.uid);
-
-      // Real-time listener
-      unsubDoc = onSnapshot(agencyRef, (snap) => {
-        const data = snap.data();
-
-        if (!data) {
-          // If somehow the document is missing, log out user
-          router.replace("/agency/login");
-          return;
-        }
-
-        if (data.approved === true) {
-          router.replace("/agency"); // approved, redirect to dashboard
-        } else {
-          router.replace("/agency/login"); // not approved, redirect to login
-        }
+    // If approved, redirect to dashboard
+    if (agencyApproved === true) {
+      hasRedirected.current = true;
+      // Force refresh the token to get updated custom claims
+      user.getIdToken(true).then(() => {
+        toastSuccess("Your agency has been approved! Redirecting to dashboard...");
+        setTimeout(() => {
+          router.replace("/agency");
+        }, 1500);
       });
-    });
-
-    return () => {
-      unsubAuth();
-      if (unsubDoc) unsubDoc();
-    };
-  }, [router]);
+    }
+    // If not approved (false), stay on this page - no action needed
+  }, [mounted, user, agencyApproved, router]);
 
   if (!mounted) return null;
 
+  // Show verification pending UI while waiting for approval
   return <VerificationPending />
 }
