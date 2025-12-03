@@ -1,8 +1,7 @@
 import axios from "axios";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { NextResponse } from "next/server";
-
-const auth = getAuth();
+import { auth } from "@/lib/firebase";
 
 export default async function signUp(email: string, password: string) {
     let result=null;

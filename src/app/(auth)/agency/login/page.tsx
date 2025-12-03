@@ -4,42 +4,55 @@ import Link from "next/link"
 import { Chrome } from "lucide-react"
 import React from "react"
 import { usePathname, useRouter } from "next/navigation"
-import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged } from "firebase/auth"
+import { createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth"
 import axios from "axios"
 import { checkUserRole } from "../../checkUserRole"
 import { toastError, toastSuccess } from "@/components/ui/ToastTypes"
 import signIn from "@/lib/auth/signin/SignIn"
-import { toast } from "sonner"
 import { handleGoogleAgencyAuth } from "@/lib/auth/agency/googleLogin"
+import { auth, db } from "@/lib/firebase"
+import { doc, getDoc } from "firebase/firestore"
 
-
-const auth = getAuth();
-
-// async function checkUserRole() {
-//   const user = auth.currentUser;
-//   if (!user) return;
-
-//   // Force refresh token to get latest custom claims
-//   const tokenResult = await user.getIdTokenResult(true);
-
-//   console.log("Custom Claims:", tokenResult.claims);
-
-//   if (tokenResult.claims.role) {
-//     console.log("User role is:", tokenResult.claims.role);
-//   } else {
-//     console.log("No role assigned");
-//   }
-// }
-
-
-export default function UserLogin() {
+export default function AgencyLogin() {
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [agencyName, setAgencyName] = React.useState('')
   const [location, setLocation] = React.useState('');
   const [isSignup, setIsSignup] = React.useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = React.useState(true);
   const pathname = usePathname();
   const router = useRouter();
+
+  // Check if user is already logged in and redirect appropriately
+  React.useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          // Check if agency exists and is approved
+          const agencyRef = doc(db, "agencies", user.uid);
+          const agencySnap = await getDoc(agencyRef);
+          
+          if (agencySnap.exists()) {
+            const agencyData = agencySnap.data();
+            if (agencyData.approved === true) {
+              // Already approved, redirect to dashboard
+              router.replace("/agency");
+              return;
+            } else {
+              // Not approved yet, redirect to verification page
+              router.replace("/agency/verify-notif");
+              return;
+            }
+          }
+        } catch (error) {
+          console.error("Error checking agency status:", error);
+        }
+      }
+      setIsCheckingAuth(false);
+    });
+
+    return () => unsubscribe();
+  }, [router]);
 
   const handleSignUp = async (event: any) => {
     event.preventDefault()
@@ -109,26 +122,43 @@ export default function UserLogin() {
     console.log(result);
 
     if (result) {
-      // getIdToken is a function that returns Promise<string>, so await it
+      try {
+        // Check if agency exists in Firestore and its approval status
+        const agencyRef = doc(db, "agencies", result.user.uid);
+        const agencySnap = await getDoc(agencyRef);
+        
+        if (!agencySnap.exists()) {
+          toastError("No agency account found. Please sign up first.");
+          return;
+        }
 
-      const token = await result.user.getIdToken();
-      const checkRole = await checkUserRole();
-      const role = checkRole?.role
-      console.log("role:", role);
-      console.log("pathname:", pathname);
-
-      if (token && role && pathname.startsWith(`/${role}`)) {
+        const agencyData = agencySnap.data();
+        const token = await result.user.getIdToken();
         localStorage.setItem('token', token);
-        console.log("token:", token);
-        toastSuccess("Logged in as agency")
-        return router.push("/agency")
-      }
 
-      else {
-        toastError("Only agencies can login!!")
+        if (agencyData.approved === true) {
+          // Agency is approved, redirect to dashboard
+          toastSuccess("Logged in as agency");
+          return router.push("/agency");
+        } else {
+          // Agency is not approved yet, redirect to verification page
+          toastSuccess("Login successful. Your account is pending approval.");
+          return router.push("/agency/verify-notif");
+        }
+      } catch (err) {
+        console.error("Error checking agency status:", err);
+        toastError("Something went wrong. Please try again.");
       }
-
     }
+  }
+
+  // Show loading while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   return (
@@ -136,11 +166,11 @@ export default function UserLogin() {
       <div className="w-full max-w-md space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
-          {isSignup ? "Create an Account" : "Welcome Back"}
+          <h1 className="text-2xl font-bold">{isSignup ? "Register Your Agency" : "Agency Login"}</h1>
           <p className="text-muted-foreground">
             {isSignup
-              ? "Sign up to start booking"
-              : "Login to your account to continue booking"}
+              ? "Sign up to list your travel packages"
+              : "Login to manage your agency dashboard"}
           </p>
         </div>
 

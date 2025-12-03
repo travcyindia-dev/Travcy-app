@@ -10,6 +10,7 @@ import { checkUserRole } from "../../checkUserRole"
 import signUp from "@/lib/auth/signup/customer/Signup"
 import signIn from "@/lib/auth/signin/SignIn"
 import { handleGoogleLogin } from "@/lib/auth/signin/googleLogin"
+import { useAuthContext } from "@/context/AuthContext"
 
 
 console.log("Loaded API KEY:", process.env.NEXT_PUBLIC_FIREBASE_API_KEY);
@@ -17,50 +18,75 @@ export default function UserLogin() {
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [isSignup, setIsSignup] = React.useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = React.useState(true);
   const pathname = usePathname()
   const router = useRouter()
+  const { user } = useAuthContext()
+
+  // Check if user is already logged in and redirect to dashboard
+  React.useEffect(() => {
+    const checkExistingAuth = async () => {
+      if (user) {
+        try {
+          const checkRole = await checkUserRole();
+          const role = checkRole?.role;
+          console.log("Existing user role:", role);
+          
+          if (role === "customer") {
+            router.push('/customer');
+            return;
+          }
+        } catch (error) {
+          console.error("Error checking user role:", error);
+        }
+      }
+      setIsCheckingAuth(false);
+    };
+    
+    checkExistingAuth();
+  }, [user, router]);
+
+  // Show loading while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 to-accent/5 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const handleSignUp = async (event: any) => {
     event.preventDefault()
 
     const { result, error, alert } = await signUp(email, password);
 
-
     if (error) {
       toastError(alert ?? "Something went wrong");
       console.log(error)
+      return;
     }
 
     // else successful
     console.log(result)
     if (result) {
       // getIdToken is a function that returns Promise<string>, so await it
-
       const token = await result.user.getIdToken();
-      const role = checkUserRole();
+      const checkRole = await checkUserRole();
+      const role = checkRole?.role;
       console.log("role:", role);
-      if (result) {
-        // getIdToken is a function that returns Promise<string>, so await it
-
-        const token = await result.user.getIdToken();
-        const checkRole = await checkUserRole();
-        const role = checkRole?.role
-        console.log("role:", role);
-        console.log("pathname:", pathname);
-        if (token && role && role === pathname.startsWith(`/customer`)) {
-          localStorage.setItem('token', token);
-          console.log("token:", token);
-          toastSuccess("Login Successful")
-          return router.push(`/customer`)
-        }
-        if (role !== pathname.includes('/customer')) {
-          toastError("Please login as a customer")
-        }
-
+      console.log("pathname:", pathname);
+      
+      if (token && role === "customer") {
+        localStorage.setItem('token', token);
+        console.log("token:", token);
+        toastSuccess("Signup Successful")
+        return router.push(`/customer`)
       }
-
+      if (role !== "customer") {
+        toastError("Please login as a customer")
+        localStorage.clear()
+      }
     }
-
   }
 
   const handleSignIn = async (event: any) => {
