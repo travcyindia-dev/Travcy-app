@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { Card, Button, Badge, Input } from '../ui/Shared';
 import { Agency, AgencyTier, Booking } from '../../types';
+import { toastSuccess } from '../ui/ToastTypes';
 
 interface AgencyPortalProps {
   agency: Agency;
@@ -24,7 +25,7 @@ export const AgencyPortal: React.FC<AgencyPortalProps> = ({ agency, bookings, on
     // Simulate API Call
     setTimeout(() => {
       setLoading(false);
-      alert("Package published successfully!");
+      toastSuccess("Package published successfully!");
       setDashView('overview');
     }, 1500);
   };
