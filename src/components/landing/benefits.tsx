@@ -35,7 +35,7 @@ export default function Benefits() {
         {/* Header */}
         <div className="mb-16">
           <p className="text-primary text-sm font-semibold tracking-widest mb-3">WHY CHOOSE US</p>
-          <h2 className="text-4xl md:text-5xl font-bold text-balance">Why book using Travelo</h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-balance">Why book using Travecy</h2>
         </div>
 
         {/* Benefits Grid */}

@@ -320,8 +320,8 @@ function ManageBookingContent({
           <div className="bg-muted/50 rounded-xl p-4">
             <p className="text-sm text-muted-foreground">
               Need help with your booking? Contact our support team at{" "}
-              <a href="mailto:support@travelopia.com" className="text-primary font-semibold">
-                support@travelopia.com
+              <a href="mailto:support@travcy.com" className="text-primary font-semibold">
+                support@travcy.com
               </a>
             </p>
           </div>

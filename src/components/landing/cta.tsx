@@ -20,7 +20,7 @@ export default function CTA() {
           <div className="relative z-10">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 text-balance">Ready to explore the world?</h2>
             <p className="text-xl text-white/90 mb-8 text-balance">
-              Join thousands of travelers discovering amazing destinations with Travelo
+              Join thousands of travelers discovering amazing destinations with Travcy
             </p>
 
             <button className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white text-primary font-semibold hover:bg-gray-50 transition-all hover:shadow-lg group">

@@ -1,6 +1,6 @@
 "use client"
 
-import { SearchIcon, MapPin, Calendar, ChevronRight, Clock, Star, Heart, ImageIcon, Building2 } from "lucide-react"
+import { SearchIcon, MapPin, Calendar, ChevronRight, Clock, Star, Heart, ImageIcon, Building2, Users2 } from "lucide-react"
 import Link from "next/link"
 import axios from "axios"
 import { useState, useEffect } from "react"
@@ -19,67 +19,176 @@ const destinations = [
   { id: 4, name: "Paris", country: "France", image: "/paris-eiffel-tower.png", packages: 21 },
 ]
 
+type PackageDoc = {
+  destination?: string;
+  title?: string;
+  duration?: number;
+  maxTravellers?: number;
+  price?: number;
+  imgUrl?: string;
+};
+
 function SearchDestinations() {
   const [destination, setDestination] = useState("")
-  const [checkIn, setCheckIn] = useState("")
+  const [noOfTravellers, setNoOfTravellers] = useState<number>(0)
   const [duration, setDuration] = useState("")
   const [results, setResults] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [wishlist, setWishlist] = useState<number[]>([]);
   const { setPackages, packages } = usePackageStore();
 
+  function useDebounce<T>(value: T, delay: number) {
+    const [debounced, setDebounced] = useState(value);
 
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setDebounced(value);
+      }, delay);
 
+      return () => clearTimeout(timer);
+    }, [value, delay]);
+
+    return debounced;
+  }
+
+  const debouncedDestination = useDebounce(destination, 300);
+  const debouncedTravellers = useDebounce(noOfTravellers, 300);
+  const debouncedDuration = useDebounce(duration, 300);
+
+  // console.log("packages from store:", packages);
   async function handleSearch() {
     setLoading(true);
+
     try {
-      let packagesRef = collection(db, "packages");
+      const packagesRef = collection(db, "packages");
+      let baseDocs: PackageDoc[] = [];
 
-      const constraints: any[] = [];
-      let q = null;
-      if (destination) {
-        q = query(packagesRef, where("destination", "==", destination))
+      if (destination.trim() !== "") {
+        const char = destination[0];
+        const upper = char.toUpperCase();
+        const lower = char.toLowerCase();
+
+        const q1 = query(
+          packagesRef,
+          where("destination", ">=", upper),
+          where("destination", "<=", upper + "\uf8ff"),
+          limit(50)
+        );
+        const q2 = query(
+          packagesRef,
+          where("destination", ">=", lower),
+          where("destination", "<=", lower + "\uf8ff"),
+          limit(50)
+        );
+
+        const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+        const merged = [...snap1.docs, ...snap2.docs];
+
+        baseDocs = merged.map(doc => ({ id: doc.id, ...(doc.data() as PackageDoc) }));
+
+        // Filter exact prefix in-memory
+        const lowerDest = destination.toLowerCase();
+        baseDocs = baseDocs.filter(pkg =>
+          pkg.destination?.toLowerCase().startsWith(lowerDest)
+        );
+      } else {
+        const snap = await getDocs(query(packagesRef, limit(100)));
+        baseDocs = snap.docs.map(doc => ({ id: doc.id, ...(doc.data() as PackageDoc) }));
       }
 
-      // if (duration) {
-      //   // Assuming duration is a string like "3-5", we can parse it
-      //   const [min, max] = duration.split("-").map(Number);
-      //   if (!isNaN(min) && !isNaN(max)) {
-      //     constraints.push(query(q, where("duration", ">=", min), where("duration", "<=", max)));
-      //   } else if (duration === "14+") {
-      //     constraints.push(query(q, where("duration", ">=", 14)));
-      //   }
-      // }
-
-      // Combine queries (Firestore allows only a limited number of 'where' clauses)
-      // let finalQuery = q;
-      // if (constraints.length) finalQuery = constraints; // simplified for one constraint
-      if (q) {
-        const snap = await getDocs(q);
-        const filtered = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
-        setResults(filtered);
+      // Filter by travellers
+      if (noOfTravellers > 0) {
+        baseDocs = baseDocs.filter(pkg => (pkg.maxTravellers ?? 0) >= noOfTravellers);
       }
 
+      // Filter by duration
+      if (duration) {
+        if (duration.includes("-")) {
+          const [min, max] = duration.split("-").map(Number);
+          baseDocs = baseDocs.filter(pkg => pkg.duration! >= min && pkg.duration! <= max);
+        } else if (duration === "14+") {
+          baseDocs = baseDocs.filter(pkg => pkg.duration! >= 14);
+        }
+      }
+
+      setResults(baseDocs);
+      console.log("Search results:", baseDocs);
+    } catch (error) {
+      console.error("Search failed:", error);
+    }
+
+    setLoading(false);
+  }
+
+
+
+  
+useEffect(() => {
+  async function runSearch() {
+    setLoading(true);
+    try {
+      const packagesRef = collection(db, "packages");
+      let baseDocs: PackageDoc[] = [];
+
+      if (debouncedDestination.trim() !== "") {
+        const char = debouncedDestination[0];
+        const upper = char.toUpperCase();
+        const lower = char.toLowerCase();
+
+        const q1 = query(
+          packagesRef,
+          where("destination", ">=", upper),
+          where("destination", "<=", upper + "\uf8ff"),
+          limit(50)
+        );
+        const q2 = query(
+          packagesRef,
+          where("destination", ">=", lower),
+          where("destination", "<=", lower + "\uf8ff"),
+          limit(50)
+        );
+
+        const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+        const merged = [...snap1.docs, ...snap2.docs];
+
+        baseDocs = merged.map(doc => ({ id: doc.id, ...(doc.data() as PackageDoc) }));
+
+        // Filter exact prefix in-memory
+        const lowerDest = debouncedDestination.toLowerCase();
+        baseDocs = baseDocs.filter(pkg =>
+          pkg.destination?.toLowerCase().startsWith(lowerDest)
+        );
+      } else {
+        const snap = await getDocs(query(packagesRef, limit(100)));
+        baseDocs = snap.docs.map(doc => ({ id: doc.id, ...(doc.data() as PackageDoc) }));
+      }
+
+      // Filter by travellers
+      if (debouncedTravellers > 0) {
+        baseDocs = baseDocs.filter(pkg => (pkg.maxTravellers ?? 0) >= debouncedTravellers);
+      }
+
+      // Filter by duration
+      if (debouncedDuration) {
+        if (debouncedDuration.includes("-")) {
+          const [min, max] = debouncedDuration.split("-").map(Number);
+          baseDocs = baseDocs.filter(pkg => pkg.duration! >= min && pkg.duration! <= max);
+        } else if (debouncedDuration === "14+") {
+          baseDocs = baseDocs.filter(pkg => pkg.duration! >= 14);
+        }
+      }
+
+      setResults(baseDocs);
     } catch (error) {
       console.error("Search failed:", error);
     }
     setLoading(false);
   }
-  // filtering as soon as user types
-  useEffect(() => {
-    if (destination.length > 1) { // min 2 chars
-      const timeout = setTimeout(() => {
-        const match = packages.filter((pkg) => pkg.destination.toLowerCase().includes(destination.toLowerCase()));
-        setResults(match);
-       
-      }, 100); // debounce 100ms
-      return () => clearTimeout(timeout);
-    }
-    if(!destination){
-      setResults([]);
-    }
-  }, [destination]);
+
+  runSearch();
+}, [debouncedDestination, debouncedTravellers, debouncedDuration]);
+
+  console.log("destination:", debouncedDestination);
   // console.log("packages:",packages);
   // console.log("bookings:",useBookingStore.getState().bookings);
   async function fetchAll() {
@@ -136,7 +245,7 @@ function SearchDestinations() {
 
   useEffect(() => {
     fetchAll();
-  }, [packages])
+  }, [])
   // console.log("packages:",packages);
   //  console.log("packages", Packages);
   // Toggle Wishlist
@@ -176,13 +285,13 @@ function SearchDestinations() {
 
           {/* Dates */}
           <div className="space-y-2">
-            <label className="text-sm font-semibold">Check In</label>
+            <label className="text-sm font-semibold">No of Travellers</label>
             <div className="relative">
-              <Calendar className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+              <Users2 className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
               <input
-                type="date"
-                value={checkIn}
-                onChange={(e) => setCheckIn(e.target.value)}
+                type="number"
+                value={noOfTravellers}
+                onChange={(e) => setNoOfTravellers(Number(e.target.value))}
                 className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
@@ -197,7 +306,7 @@ function SearchDestinations() {
               className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
             >
               <option value="">Any duration</option>
-              <option value="3-5">3-5 days</option>
+              <option value="2-5">2-5 days</option>
               <option value="5-7">5-7 days</option>
               <option value="7-14">7-14 days</option>
               <option value="14+">14+ days</option>
@@ -246,19 +355,19 @@ function SearchDestinations() {
 
                     <div className="p-5 flex flex-col flex-1">
                       <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-bold text-lg text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">
-                          {pkg.title || `${pkg.destination} Adventure`}
+                        <h3 className="font-bold leading-tight group-hover:text-blue-600 transition-colors flex justify-center items-center gap-3">
+                          <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center ">
+                            <Building2 className="w-3.5 h-3.5 text-primary" />
+                          </div>
+                          <h1 className="text-lg text-slate-900 font-bold leading-tight group-hover:text-blue-600 transition-colors ">{pkg.agencyName || "Travel Agency"}</h1>
                         </h3>
                       </div>
-                      
+
                       {/* Agency Info */}
                       <div className="flex items-center gap-2 mb-3">
-                        <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
-                          <Building2 className="w-3.5 h-3.5 text-primary" />
-                        </div>
-                        <span className="text-sm text-slate-600 font-medium">{pkg.agencyName || "Travel Agency"}</span>
+                        {pkg.title || `${pkg.destination} Adventure`}
                       </div>
-                      
+
                       <p className="text-sm text-slate-500 mb-4 line-clamp-2">{pkg.description || `An immersive experience into the heart of ${pkg.destination}.`}</p>
 
                       <div className="flex items-center gap-4 text-xs font-medium text-slate-500 mb-6">
@@ -266,7 +375,7 @@ function SearchDestinations() {
                           <Clock className="w-3.5 h-3.5" /> {pkg.duration} Days
                         </div>
                         <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded">
-                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> 
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                           {pkg.rating ? `${Number(pkg.rating).toFixed(1)} (${pkg.reviewCount || 0})` : "New"}
                         </div>
                       </div>
@@ -326,7 +435,7 @@ function SearchDestinations() {
                         {pkg.title || `${pkg.destination} Adventure`}
                       </h3>
                     </div>
-                    
+
                     {/* Agency Info */}
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
@@ -334,7 +443,7 @@ function SearchDestinations() {
                       </div>
                       <span className="text-sm text-slate-600 font-medium">{pkg.agencyName || "Travel Agency"}</span>
                     </div>
-                    
+
                     <p className="text-sm text-slate-500 mb-4 line-clamp-2">{pkg.description || `An immersive experience into the heart of ${pkg.destination}.`}</p>
 
                     <div className="flex items-center gap-4 text-xs font-medium text-slate-500 mb-6">
@@ -342,7 +451,7 @@ function SearchDestinations() {
                         <Clock className="w-3.5 h-3.5" /> {pkg.duration} Days
                       </div>
                       <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded">
-                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> 
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                         {pkg.rating ? `${Number(pkg.rating).toFixed(1)} (${pkg.reviewCount || 0})` : "New"}
                       </div>
                     </div>

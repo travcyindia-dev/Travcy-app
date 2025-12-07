@@ -14,7 +14,7 @@ export default function Header() {
         <div className="flex items-center gap-2 group cursor-pointer hover:opacity-80 transition-opacity">
           <Globe className="w-6 h-6 text-primary" />
           <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            Travelo
+            Travcy
           </span>
         </div>
 

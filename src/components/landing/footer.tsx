@@ -5,7 +5,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
           <div>
-            <h3 className="font-bold text-lg mb-4">Travelo</h3>
+            <h3 className="font-bold text-lg mb-4">Travcy</h3>
             <p className="text-sm text-muted-foreground">
               Discover the world's most extraordinary destinations with us.
             </p>
@@ -80,7 +80,7 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="border-t border-border/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">© 2025 Travelo. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">© 2025 Travcy. All rights reserved.</p>
           <div className="flex gap-6">
             <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
               Twitter

@@ -21,23 +21,27 @@ interface PackageState {
   addPackage: (pkg: Package) => void;
   updatePackage: (id: string, data: Partial<Package>) => void;
   removePackage: (id: string) => void;
-  reset:()=>void;
+  loading: boolean,
+    setLoading: (l:any) => void;
+  reset: () => void;
 }
 
 export const usePackageStore = create<PackageState>()(persist(
   (set) => ({
-  packages: [],
-  setPackages: (packages) => set({ packages }),
-  addPackage: (pkg) => set((state) => ({ packages: [...state.packages, pkg] })),
-  updatePackage: (id, data) =>
-    set((state) => ({
-      packages: state.packages.map((p) => (p.id === id ? { ...p, ...data } : p)),
-    })),
-  removePackage: (id) =>
-    set((state) => ({ packages: state.packages.filter((p) => p.id !== id) })),
-  reset:()=>set({packages:[]})
-}),
-{
-  name:"package-store"
-}
+    packages: [],
+    setPackages: (packages) => set({ packages }),
+    addPackage: (pkg) => set((state) => ({ packages: [...state.packages, pkg] })),
+    updatePackage: (id, data) =>
+      set((state) => ({
+        packages: state.packages.map((p) => (p.id === id ? { ...p, ...data } : p)),
+      })),
+    removePackage: (id) =>
+      set((state) => ({ packages: state.packages.filter((p) => p.id !== id) })),
+    loading: false,
+    setLoading: (l:any) => set({ loading: l }),
+  reset: () => set({ packages: [] })
+  }),
+  {
+    name: "package-store"
+  }
 ));
