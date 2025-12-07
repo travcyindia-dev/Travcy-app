@@ -430,18 +430,21 @@ useEffect(() => {
                   </div>
 
                   <div className="p-5 flex flex-col flex-1">
-                    <div className="flex justify-between items-start mb-2">
+                    <div className="flex gap-2 items-start mb-2">
+                       <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
+                        <Building2 className="w-3.5 h-3.5 text-primary" />
+                      </div>
                       <h3 className="font-bold text-lg text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">
-                        {pkg.title || `${pkg.destination} Adventure`}
+                        
+                        {pkg.agencyName || "Travel Agency"}
+                      
                       </h3>
                     </div>
 
                     {/* Agency Info */}
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
-                        <Building2 className="w-3.5 h-3.5 text-primary" />
-                      </div>
-                      <span className="text-sm text-slate-600 font-medium">{pkg.agencyName || "Travel Agency"}</span>
+                     
+                      <span className="text-sm text-slate-600 font-medium">  {pkg.title || `${pkg.destination} Adventure`}</span>
                     </div>
 
                     <p className="text-sm text-slate-500 mb-4 line-clamp-2">{pkg.description || `An immersive experience into the heart of ${pkg.destination}.`}</p>
