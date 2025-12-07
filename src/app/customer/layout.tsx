@@ -27,7 +27,7 @@ export default function UserLayout({
           <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <Link href="/customer" className="flex items-center gap-2 font-bold text-xl text-primary">
               <MapPin className="w-6 h-6" />
-              Travelopia
+              Travcy
             </Link>
 
             <div className="flex items-center gap-1">

@@ -11,7 +11,7 @@ export default function Landing() {
             {/* Left Content */}
             <div className="space-y-8">
               <div className="space-y-4">
-                <p className="text-sm font-semibold text-primary uppercase tracking-widest">Welcome to Travelopia</p>
+                <p className="text-sm font-semibold text-primary uppercase tracking-widest">Welcome to Travcy</p>
                 <h1 className="text-5xl lg:text-6xl font-bold text-balance">Discover Your Next Adventure</h1>
                 <p className="text-xl text-muted-foreground">
                   Connect with travel agents to book unforgettable experiences. Find curated destinations and

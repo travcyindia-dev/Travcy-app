@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 export const emailTemplates = {
     // Customer Welcome Email
     customerWelcome: (name: string) => ({
-        subject: '🎉 Welcome to Travelopia - Your Adventure Begins!',
+        subject: '🎉 Welcome to Travecy - Your Adventure Begins!',
         html: `
             <!DOCTYPE html>
             <html>
@@ -38,13 +38,13 @@ export const emailTemplates = {
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>🌍 Welcome to Travelopia!</h1>
+                        <h1>🌍 Welcome to Travecy!</h1>
                         <p>Your gateway to amazing travel experiences</p>
                     </div>
                     <div class="content">
                         <h2>Hello ${name}! 👋</h2>
-                        <p>Thank you for joining Travelopia! We're thrilled to have you as part of our travel community.</p>
-                        <p>With Travelopia, you can:</p>
+                        <p>Thank you for joining Travecy! We're thrilled to have you as part of our travel community.</p>
+                        <p>With Travecy, you can:</p>
                         <div class="features">
                             <div class="feature">
                                 <div class="feature-icon">🗺️</div>
@@ -63,7 +63,7 @@ export const emailTemplates = {
                         <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/customer" class="btn">Explore Packages →</a>
                     </div>
                     <div class="footer">
-                        <p>© 2025 Travelopia. All rights reserved.</p>
+                        <p>© 2025 Travecy. All rights reserved.</p>
                         <p>Making travel dreams come true, one journey at a time.</p>
                     </div>
                 </div>
@@ -154,7 +154,7 @@ export const emailTemplates = {
                     </div>
                     <div class="footer">
                         <p>Need help? Contact our support team.</p>
-                        <p>© 2025 Travelopia. All rights reserved.</p>
+                        <p>© 2025 Travecy. All rights reserved.</p>
                     </div>
                 </div>
             </body>
@@ -225,7 +225,7 @@ export const emailTemplates = {
                         <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/customer" class="btn">Browse Packages</a>
                     </div>
                     <div class="footer">
-                        <p>© 2025 Travelopia. All rights reserved.</p>
+                        <p>© 2025 Travecy. All rights reserved.</p>
                     </div>
                 </div>
             </body>
@@ -235,7 +235,7 @@ export const emailTemplates = {
 
     // Agency Welcome Email
     agencyWelcome: (agencyName: string) => ({
-        subject: '🎉 Welcome to Travelopia - Agency Registration Received!',
+        subject: '🎉 Welcome to Travecy - Agency Registration Received!',
         html: `
             <!DOCTYPE html>
             <html>
@@ -259,12 +259,12 @@ export const emailTemplates = {
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>🏢 Welcome to Travelopia!</h1>
+                        <h1>🏢 Welcome to Travecy!</h1>
                         <p style="color: rgba(255,255,255,0.9);">Agency Partner Program</p>
                     </div>
                     <div class="content">
                         <h2 style="color: #1e293b; margin-top: 0;">Hello ${agencyName}! 👋</h2>
-                        <p style="color: #64748b;">Thank you for registering your agency with Travelopia! We're excited to have you as a potential partner.</p>
+                        <p style="color: #64748b;">Thank you for registering your agency with Travecy! We're excited to have you as a potential partner.</p>
                         
                         <div class="status-card">
                             <h3>⏳ Verification Pending</h3>
@@ -299,7 +299,7 @@ export const emailTemplates = {
                         <p style="color: #64748b;">This process usually takes 1-2 business days. We'll notify you as soon as your agency is verified!</p>
                     </div>
                     <div class="footer">
-                        <p>© 2025 Travelopia. All rights reserved.</p>
+                        <p>© 2025 Travecy. All rights reserved.</p>
                         <p>Empowering travel agencies worldwide.</p>
                     </div>
                 </div>
@@ -395,7 +395,7 @@ export const emailTemplates = {
                         <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/agency" class="btn">View Dashboard</a>
                     </div>
                     <div class="footer">
-                        <p>© 2025 Travelopia. All rights reserved.</p>
+                        <p>© 2025 Travecy. All rights reserved.</p>
                     </div>
                 </div>
             </body>
@@ -415,7 +415,7 @@ export async function sendEmail(to: string, template: { subject: string; html: s
         }
 
         const mailOptions = {
-            from: `"Travelopia" <${process.env.SMTP_EMAIL}>`,
+            from: `"Travcy" <${process.env.SMTP_EMAIL}>`,
             to,
             subject: template.subject,
             html: template.html,
