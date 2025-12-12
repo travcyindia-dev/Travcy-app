@@ -1,5 +1,5 @@
 import admin from 'firebase-admin';
-import agencies from './travelAgencies.json';
+// import agencies from './travelAgencies.json';
 
 // Initialize Firebase
 admin.initializeApp({
@@ -17,16 +17,16 @@ interface Agency {
   rating: number;
 }
 
-async function uploadAgencies() {
-  const batch = db.batch();
+// async function uploadAgencies() {
+//   const batch = db.batch();
 
-  (agencies as Agency[]).forEach(agency => {
-    const docRef = db.collection('travelAgencies').doc(agency.id.toString());
-    batch.set(docRef, agency);
-  });
+//   (agencies as Agency[]).forEach(agency => {
+//     const docRef = db.collection('travelAgencies').doc(agency.id.toString());
+//     batch.set(docRef, agency);
+//   });
 
-  await batch.commit();
-  console.log('All agencies uploaded successfully!');
-}
+//   await batch.commit();
+//   console.log('All agencies uploaded successfully!');
+// }
 
-uploadAgencies().catch(console.error);
+// uploadAgencies().catch(console.error);
