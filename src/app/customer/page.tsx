@@ -191,9 +191,23 @@ useEffect(() => {
   console.log("destination:", debouncedDestination);
   // console.log("packages:",packages);
   // console.log("bookings:",useBookingStore.getState().bookings);
-  async function fetchAll() {
+  
+  async function fetchTopPackages() {
     try {
-      const packagesSnap = await getDocs(collection(db, "packages"));
+      // Fetch all bookings to calculate package popularity
+      const bookingsSnap = await getDocs(collection(db, "bookings"));
+      const packageBookingCounts: Record<string, number> = {};
+
+      bookingsSnap.docs.forEach((doc) => {
+        const data = doc.data();
+        const packageId = data.packageId;
+        if (packageId) {
+          packageBookingCounts[packageId] = (packageBookingCounts[packageId] || 0) + 1;
+        }
+      });
+
+      // Fetch packages with a reasonable limit
+      const packagesSnap = await getDocs(query(collection(db, "packages"), limit(100)));
       const packagesData = packagesSnap.docs.map((doc) => {
         const data = doc.data();
         return {
@@ -206,6 +220,7 @@ useEffect(() => {
           agencyName: data.agencyName || "",
           agencyId: data.agencyId || "",
           description: data.description || "",
+          bookingCount: packageBookingCounts[doc.id] || 0,
           ...data,
         };
       });
@@ -233,10 +248,15 @@ useEffect(() => {
         })
       );
 
-      // Store in Zustand
-      setPackages(packagesWithAgency);
+      // Sort by booking count (descending) and take top 16 packages
+      const topPackages = packagesWithAgency
+        .sort((a, b) => b.bookingCount - a.bookingCount)
+        .slice(0, 16);
 
-      return packagesWithAgency;
+      // Store in Zustand
+      setPackages(topPackages);
+
+      return topPackages;
     } catch (error) {
       console.error("Failed to fetch packages:", error);
       return [];
@@ -244,7 +264,7 @@ useEffect(() => {
   }
 
   useEffect(() => {
-    fetchAll();
+    fetchTopPackages();
   }, [])
   // console.log("packages:",packages);
   //  console.log("packages", Packages);
@@ -328,7 +348,13 @@ useEffect(() => {
       <section>
         {!results.length &&
           <>
-            <h2 className="text-2xl font-bold mb-6">Popular Destinations</h2>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-2xl font-bold">Top Destinations</h2>
+                <p className="text-sm text-muted-foreground mt-1">Based on customer bookings and popularity</p>
+              </div>
+              <p className="text-sm text-muted-foreground">Use search to find more packages</p>
+            </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               {packages.map((pkg) => (
                 <Link key={pkg.id} href={`/customer/destination/${pkg.id}`}>

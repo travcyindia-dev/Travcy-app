@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { ArrowRight } from "lucide-react"
+import Link from "next/link"
 
 export default function Hero() {
   const [isVisible, setIsVisible] = useState(false)
@@ -28,7 +29,7 @@ export default function Hero() {
             <div>
               <p className="text-primary text-sm font-semibold tracking-widest mb-2">EXPLORE THE WORLD</p>
               <h1 className="text-5xl md:text-6xl font-bold leading-tight text-balance">
-                From <span className="text-primary">Southeast Asia</span> to the World
+                Your <span className="text-primary">Best Travel Agency</span> a click away
               </h1>
             </div>
 
@@ -38,26 +39,19 @@ export default function Hero() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <button className="px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all hover:shadow-lg hover:shadow-primary/20 flex items-center justify-center gap-2 group">
-                Start Exploring
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button className="px-8 py-4 rounded-full border border-primary/20 text-primary font-semibold hover:bg-primary/5 transition-all">
-                Learn More
-              </button>
+              <Link href="/customer/login">
+                <button className="px-8 py-4 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all hover:shadow-lg hover:shadow-primary/20 flex items-center justify-center gap-2 group">
+                  Start Exploring
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </Link>
+              <Link href="#benefits">
+                <button className="px-8 py-4 rounded-full border border-primary/20 text-primary font-semibold hover:bg-primary/5 transition-all">
+                  Learn More
+                </button>
+              </Link>
             </div>
 
-            {/* Stats */}
-            <div className="flex gap-8 pt-8">
-              <div className="animate-in fade-in slide-in-from-bottom-4 animation-delay-300">
-                <p className="text-3xl font-bold text-primary">500+</p>
-                <p className="text-sm text-muted-foreground">Destinations</p>
-              </div>
-              <div className="animate-in fade-in slide-in-from-bottom-4 animation-delay-500">
-                <p className="text-3xl font-bold text-primary">50K+</p>
-                <p className="text-sm text-muted-foreground">Happy Travelers</p>
-              </div>
-            </div>
           </div>
         </div>
 

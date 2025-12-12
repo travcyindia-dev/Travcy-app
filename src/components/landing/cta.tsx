@@ -2,6 +2,7 @@
 
 import { useInView } from "@/hooks/use-in-view"
 import { ArrowRight } from "lucide-react"
+import Link from "next/link"
 
 export default function CTA() {
   const { ref, isVisible } = useInView()
@@ -18,15 +19,17 @@ export default function CTA() {
           <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
 
           <div className="relative z-10">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 text-balance">Ready to explore the world?</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 text-balance">Reimagining How India Travels</h2>
             <p className="text-xl text-white/90 mb-8 text-balance">
               Join thousands of travelers discovering amazing destinations with Travcy
             </p>
 
-            <button className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white text-primary font-semibold hover:bg-gray-50 transition-all hover:shadow-lg group">
+            <Link href="/customer/login">
+            <button className="inline-flex cursor-pointer items-center gap-2 px-8 py-4 rounded-full bg-white text-primary font-semibold hover:bg-gray-50 transition-all hover:shadow-lg group">
               Start Your Journey
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
+            </Link>
           </div>
         </div>
       </div>
