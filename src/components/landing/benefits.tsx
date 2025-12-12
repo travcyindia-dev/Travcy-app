@@ -6,7 +6,7 @@ import { Zap, Users, Shield, Truck } from "lucide-react"
 const benefits = [
   {
     icon: Zap,
-    title: "All You Need",
+    title: "Verified Travel Agencies",
     description: "Everything from booking to experience planning in one place",
   },
   {
@@ -30,12 +30,12 @@ export default function Benefits() {
   const { ref, isVisible } = useInView()
 
   return (
-    <section ref={ref} className="py-20 px-4 sm:px-6 lg:px-8 bg-card/30 backdrop-blur-sm">
+    <section id="benefits" ref={ref} className="py-20 px-4 sm:px-6 lg:px-8 bg-card/30 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-16">
           <p className="text-primary text-sm font-semibold tracking-widest mb-3">WHY CHOOSE US</p>
-          <h2 className="text-4xl md:text-5xl font-bold text-balance">Why book using Travecy</h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-balance">Why book using Travcy</h2>
         </div>
 
         {/* Benefits Grid */}
