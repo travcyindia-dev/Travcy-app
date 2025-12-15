@@ -1,11 +1,16 @@
 import admin from "firebase-admin";
-import serviceAccountJson from "@/firebase-upload/serviceAccountKey.json"; // rename import
+import fs from "fs";
+import path from "path";
 
-const serviceAccount: admin.ServiceAccount = serviceAccountJson as admin.ServiceAccount;
+// Use relative path from this file to the JSON
+const serviceAccountPath = path.join(process.cwd(), "firebase/serviceAccountKey.json");
 
-if(!admin.apps.length){
+const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf-8"));
+
+if (!admin.apps.length) {
   admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+    credential: admin.credential.cert(serviceAccount),
+  });
 }
-export {admin}
+
+export default admin;
