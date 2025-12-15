@@ -1,7 +1,7 @@
 import admin from "firebase-admin";
-import serviceAccountJson from "@/firebase-upload/serviceAccountKey.json"; // rename import
+// import serviceAccountJson from "@/firebase-upload/serviceAccountKey.json"; // rename import
 
-const serviceAccount: admin.ServiceAccount = serviceAccountJson as admin.ServiceAccount;
+// const serviceAccount: admin.ServiceAccount = serviceAccountJson as admin.ServiceAccount;
 
 if (!admin.apps.length) {
   admin.initializeApp({
