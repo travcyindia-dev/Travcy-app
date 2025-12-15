@@ -64,12 +64,12 @@ export default function Header() {
               <a href="#" className="text-sm hover:text-primary transition-colors">
                 About
               </a>
-              <Link href="/login/customer" className="w-full">
+              <Link href="/customer/login" className="w-full">
                 <button className="w-full px-4 py-2 rounded-full text-sm font-medium border border-primary text-primary hover:bg-primary/5 transition-all">
                   Customer Login
                 </button>
               </Link>
-              <Link href="/login/agent" className="w-full">
+              <Link href="/agency/login/" className="w-full">
                 <button className="w-full px-4 py-2 rounded-full text-sm font-medium border border-primary text-primary hover:bg-primary/5 transition-all">
                   Agent Login
                 </button>
