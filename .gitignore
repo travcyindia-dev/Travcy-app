@@ -40,14 +40,12 @@ firestore-debug.log
 ui-debug.log
 .firebaserc.local
 
-# Firebase service account keys (NEVER commit these!)
-**/serviceAccountKey.json
-**/*serviceAccount*.json
-
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+server/firebase/serviceAccountKey.json
 src/firebase-upload/serviceAccountKey.json
