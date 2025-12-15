@@ -1,3 +1,4 @@
+import { admin } from "@/lib/firebaseAdmin";
 import { NextResponse } from "next/server";
 
 const db = admin.firestore();
