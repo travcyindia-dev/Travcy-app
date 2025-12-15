@@ -48,4 +48,4 @@ ui-debug.log
 next-env.d.ts
 
 ./server/firebase/serviceAccountKey.json
-./src/firebase-upload/serviceAccountKey.json
+./src/firebase-upload/serviceAccountKey.jsonsrc/firebase-upload/serviceAccountKey.json
