@@ -47,5 +47,5 @@ ui-debug.log
 *.tsbuildinfo
 next-env.d.ts
 
-server/firebase/serviceAccountKey.json
-src/firebase-upload/serviceAccountKey.json
+./server/firebase/serviceAccountKey.json
+./src/firebase-upload/serviceAccountKey.json
