@@ -33,18 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
-# firebase
-.firebase
-firebase-debug.log
-firestore-debug.log
-ui-debug.log
-.firebaserc.local
-
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-src/firebase-upload/serviceAccountKey.json
