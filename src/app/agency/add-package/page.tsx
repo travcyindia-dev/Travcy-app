@@ -8,10 +8,6 @@ import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { ArrowLeft, DollarSign, ImageIcon, Loader2, Plus, X, Eye, EyeOff, Check, Star, MapPin, Calendar, Users, ShieldCheck, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import React, { FormEvent, useState } from 'react'
-<<<<<<< HEAD
-import { v4 as uuid } from "uuid";
-=======
->>>>>>> 6f613bfc30f42b8b2a4a6e76fac67341bc8347dd
 import { toastSuccess, toastError } from '@/components/ui/ToastTypes'
 
 export const storage = getStorage(app);
